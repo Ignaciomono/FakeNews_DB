@@ -1,14 +1,16 @@
-# === FAKENEWS_DB PROJECT GITIGNORE ===
-# Optimizado para FastAPI + PostgreSQL + Hugging Face API externa
+# === FAKE NEWS DETECTOR API - GITIGNORE ===
+# Optimizado para FastAPI + Vercel + Python
 
 # === ENVIRONMENT VARIABLES AND SECRETS ===
 .env
 .env.local
 .env.*.local
 .env.production
+.env.development
 *.key
 *.pem
 secrets/
+config/local.py
 
 # === PYTHON CACHE AND BYTECODE ===
 __pycache__/
@@ -41,13 +43,110 @@ ENV/
 env.bak/
 venv.bak/
 .venv/
+.conda/
+anaconda/
+miniconda/
 
-# === IDES AND EDITORS ===
+# === IDEs AND EDITORS ===
 .vscode/
 .idea/
 *.swp
 *.swo
 *~
+.spyderproject
+.spyproject
+.ropeproject
+*.sublime-*
+
+# === VERCEL DEPLOYMENT ===
+.vercel
+.vercel/
+*.log
+.next/
+
+# === TESTING AND COVERAGE ===
+.coverage
+.pytest_cache/
+.tox/
+.nox/
+htmlcov/
+.coverage.*
+coverage.xml
+*.cover
+*.py,cover
+.hypothesis/
+
+# === DATABASE FILES (Local Development) ===
+*.db
+*.sqlite
+*.sqlite3
+database.db
+test.db
+local.db
+
+# === LOGS AND TEMPORARY FILES ===
+*.log
+logs/
+temp/
+tmp/
+*.tmp
+*.temp
+.DS_Store
+Thumbs.db
+
+# === API DOCUMENTATION CACHE ===
+docs/_build/
+site/
+
+# === JUPYTER NOTEBOOKS ===
+.ipynb_checkpoints
+*.ipynb
+
+# === PACKAGE MANAGER ===
+node_modules/
+package-lock.json
+yarn.lock
+
+# === BACKUP FILES ===
+*.bak
+*.backup
+*.old
+*~
+
+# === PROFILING ===
+.prof
+
+# === MYPY TYPE CHECKING ===
+.mypy_cache/
+.dmypy.json
+dmypy.json
+
+# === SPECIFIC PROJECT FILES ===
+# Mantener archivos de configuración del proyecto
+!vercel.json
+!requirements.txt
+!main.py
+!app/
+!README.md
+
+# === DEVELOPMENT ONLY FILES ===
+test_local.py
+debug.py
+playground/
+experiments/
+drafts/
+
+# === MEDIA AND UPLOADS ===
+uploads/
+media/
+static/uploads/
+
+# === SENSITIVE DATA ===
+*password*
+*secret*
+*token*
+*api_key*
+*credentials*
 .project
 .classpath
 .settings/
