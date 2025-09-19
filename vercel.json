@@ -14,5 +14,15 @@
       "destination": "/docs",
       "permanent": false
     }
-  ]
+  ],
+  "functions": {
+    "main.py": {
+      "memory": 1024
+    }
+  },
+  "build": {
+    "env": {
+      "PYTHONPATH": "$PYTHONPATH:/vercel/path0"
+    }
+  }
 }

@@ -17,13 +17,17 @@ python-dotenv==1.0.1
 # === PROCESAMIENTO DE CONTENIDO ===
 bleach==6.2.0
 beautifulsoup4==4.12.3
-lxml[html_clean]==5.3.0
+lxml==5.3.0
 
-# === IA Y ANÁLISIS (VERSIONES LIGERAS) ===
-transformers==4.56.2
-torch==2.5.1+cpu --index-url https://download.pytorch.org/whl/cpu
-tokenizers==0.21.0
-huggingface-hub==0.26.2
+# === IA Y ANÁLISIS (VERSIONES MUY LIGERAS) ===
+# Usando torch CPU más pequeño
+--find-links https://download.pytorch.org/whl/torch_stable.html
+torch==2.1.0+cpu
+# Transformers sin dependencias pesadas
+transformers==4.35.0
+tokenizers==0.14.1
+# Hub ligero
+huggingface-hub==0.17.3
 
 # === EXTRACCIÓN WEB ===
 newspaper3k==0.2.8
