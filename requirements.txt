@@ -1,4 +1,6 @@
-# === DEPENDENCIAS MÍNIMAS PARA VERCEL (SIN IA) ===
+# === FAKE NEWS DETECTOR - DEPENDENCIAS OPTIMIZADAS ===
+
+# === FRAMEWORK WEB ===
 fastapi==0.116.0
 uvicorn[standard]==0.32.0
 pydantic==2.10.0
@@ -9,10 +11,14 @@ sqlalchemy==2.0.36
 asyncpg==0.30.0
 alembic==1.14.0
 
-# === CORS Y MIDDLEWARE ===
+# === MIDDLEWARE Y SEGURIDAD ===
 python-multipart==0.0.17
 slowapi==0.1.9
 python-dotenv==1.0.1
+
+# === HTTP CLIENT PARA IA EXTERNA ===
+aiohttp==3.9.1
+httpx==0.25.2
 
 # === PROCESAMIENTO DE CONTENIDO ===
 bleach==6.2.0
@@ -29,5 +35,6 @@ python-dateutil==2.9.0.post0
 typing-extensions==4.12.2
 
 # === NOTA ===
-# Las dependencias de IA (torch, transformers) se han removido temporalmente
-# para evitar OOM durante el deploy. El sistema usará el modo MOCK automáticamente.
+# Este proyecto usa Hugging Face Inference API (externa y gratuita)
+# No requiere instalación local de PyTorch, Transformers, etc.
+# Reducción significativa de tamaño: ~50MB vs ~500MB
