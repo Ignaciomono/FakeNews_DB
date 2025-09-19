@@ -106,9 +106,9 @@ async def log_requests(request: Request, call_next):
     
     return response
 
-# Incluir routers con prefijos para mejor organización
-app.include_router(analysis.router, prefix="/api")
-app.include_router(metrics.router, prefix="/api") 
+# Incluir routers - sin prefijos duplicados ya que los routers ya los tienen
+app.include_router(analysis.router)
+app.include_router(metrics.router) 
 app.include_router(health.router)
 
 # Endpoints adicionales
@@ -399,6 +399,8 @@ async def swagger_ui_docs():
 @app.get("/openapi.json", include_in_schema=False)
 async def custom_openapi():
     """OpenAPI schema que incluye todos los endpoints"""
+    # Forzar regeneración del schema
+    app.openapi_schema = None
     return app.openapi()
 
 if __name__ == "__main__":
