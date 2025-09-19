@@ -6,10 +6,10 @@
       "use": "@vercel/python"
     }
   ],
-  "redirects": [
+  "routes": [
     {
-      "source": "/",
-      "destination": "/docs"
+      "src": "/(.*)",
+      "dest": "main.py"
     }
   ]
 }

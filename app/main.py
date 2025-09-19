@@ -183,18 +183,112 @@ async def http_exception_handler(request: Request, exc: HTTPException):
         }
     )
 
+# Endpoints de prueba y documentación
+@app.get("/test-routing")
+async def test_routing():
+    """Endpoint simple para probar que el routing funciona en Vercel"""
+    return {
+        "message": "✅ Routing funcionando correctamente",
+        "timestamp": time.time(),
+        "vercel_test": "OK"
+    }
+
+@app.get("/api-docs", response_class=HTMLResponse)
+async def api_documentation():
+    """Documentación básica de la API como fallback"""
+    html_content = """
+    <!DOCTYPE html>
+    <html lang="es">
+    <head>
+        <meta charset="UTF-8">
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+        <title>Fake News Detector API - Documentación</title>
+        <style>
+            body { font-family: Arial, sans-serif; max-width: 800px; margin: 40px auto; padding: 20px; }
+            .header { background: #007acc; color: white; padding: 20px; border-radius: 8px; }
+            .endpoint { background: #f5f5f5; padding: 15px; margin: 10px 0; border-radius: 5px; }
+            .method { color: white; padding: 5px 10px; border-radius: 3px; font-weight: bold; }
+            .get { background: #61affe; }
+            .post { background: #49cc90; }
+            code { background: #f0f0f0; padding: 2px 5px; border-radius: 3px; }
+        </style>
+    </head>
+    <body>
+        <div class="header">
+            <h1>🔍 Fake News Detector API</h1>
+            <p>API para detección de fake news usando inteligencia artificial</p>
+        </div>
+        
+        <h2>📋 Endpoints Principales</h2>
+        
+        <div class="endpoint">
+            <span class="method get">GET</span>
+            <strong>/</strong>
+            <p>Información básica de la API</p>
+        </div>
+        
+        <div class="endpoint">
+            <span class="method post">POST</span>
+            <strong>/api/analyze</strong>
+            <p>Analizar contenido para detectar fake news</p>
+            <code>{"text": "texto a analizar"}</code>
+        </div>
+        
+        <div class="endpoint">
+            <span class="method get">GET</span>
+            <strong>/health</strong>
+            <p>Estado de salud del sistema</p>
+        </div>
+        
+        <div class="endpoint">
+            <span class="method get">GET</span>
+            <strong>/api/metrics/summary</strong>
+            <p>Estadísticas generales del sistema</p>
+        </div>
+        
+        <div class="endpoint">
+            <span class="method get">GET</span>
+            <strong>/redoc</strong>
+            <p>Documentación detallada (ReDoc)</p>
+        </div>
+        
+        <h2>🔗 Enlaces útiles</h2>
+        <ul>
+            <li><a href="/redoc">📖 Documentación ReDoc</a></li>
+            <li><a href="/openapi.json">⚙️ Schema OpenAPI</a></li>
+            <li><a href="/health">💚 Health Check</a></li>
+            <li><a href="/test-routing">🧪 Test Routing</a></li>
+        </ul>
+        
+        <h2>🚀 Uso de la API</h2>
+        <p>Base URL: <code>https://fakenewsignacionomonos-projects.vercel.app</code></p>
+        
+        <h3>Ejemplo de análisis:</h3>
+        <pre>
+POST /api/analyze
+Content-Type: application/json
+
+{
+  "text": "Este es un texto de ejemplo para analizar"
+}
+        </pre>
+    </body>
+    </html>
+    """
+    return HTMLResponse(content=html_content)
+
 # Solución directa para Swagger UI en Vercel
 from fastapi.responses import HTMLResponse
 from fastapi.openapi.utils import get_openapi
 
 @app.get("/docs", include_in_schema=False, response_class=HTMLResponse)
-async def custom_swagger_ui_html():
-    """Swagger UI completamente manual para Vercel"""
+async def swagger_ui_docs():
+    """Swagger UI completamente manual para Vercel - sin conflictos"""
     html_content = f"""
     <!DOCTYPE html>
     <html>
     <head>
-        <title>{app.title} - Swagger UI</title>
+        <title>{app.title} - API Documentation</title>
         <link rel="stylesheet" type="text/css" href="https://unpkg.com/swagger-ui-dist@5.9.0/swagger-ui.css" />
         <style>
             html {{
@@ -217,19 +311,24 @@ async def custom_swagger_ui_html():
         <script src="https://unpkg.com/swagger-ui-dist@5.9.0/swagger-ui-standalone-preset.js"></script>
         <script>
             window.onload = function() {{
-                const ui = SwaggerUIBundle({{
-                    url: '/openapi.json',
-                    dom_id: '#swagger-ui',
-                    deepLinking: true,
-                    presets: [
-                        SwaggerUIBundle.presets.apis,
-                        SwaggerUIStandalonePreset
-                    ],
-                    plugins: [
-                        SwaggerUIBundle.plugins.DownloadUrl
-                    ],
-                    layout: "StandaloneLayout"
-                }});
+                try {{
+                    const ui = SwaggerUIBundle({{
+                        url: './openapi.json',
+                        dom_id: '#swagger-ui',
+                        deepLinking: true,
+                        presets: [
+                            SwaggerUIBundle.presets.apis,
+                            SwaggerUIStandalonePreset
+                        ],
+                        plugins: [
+                            SwaggerUIBundle.plugins.DownloadUrl
+                        ],
+                        layout: "StandaloneLayout",
+                        tryItOutEnabled: true
+                    }});
+                }} catch(e) {{
+                    document.getElementById('swagger-ui').innerHTML = '<h2>Error loading Swagger UI</h2><p>Try <a href="/api-docs">Basic Documentation</a></p>';
+                }}
             }};
         </script>
     </body>
