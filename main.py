@@ -2,8 +2,8 @@
 Punto de entrada principal para la aplicación Fake News Detector - Vercel
 """
 
-# Importar directamente sin try/catch para Vercel
-from app.main import app
+# Usar versión mínima para debugging
+from app.main_minimal import app
 
 # Para desarrollo local
 if __name__ == "__main__":
