@@ -1,10 +1,9 @@
-# === FAKE NEWS DETECTOR - DEPENDENCIAS OPTIMIZADAS ===
+# === FAKE NEWS DETECTOR - DEPENDENCIAS OPTIMIZADAS VERCEL ===
 
 # === FRAMEWORK WEB ===
 fastapi==0.116.0
-uvicorn[standard]==0.32.0
+uvicorn==0.32.0
 pydantic==2.10.0
-pydantic-settings==2.6.0
 
 # === BASE DE DATOS ===
 sqlalchemy==2.0.36
@@ -13,8 +12,6 @@ alembic==1.14.0
 
 # === MIDDLEWARE Y SEGURIDAD ===
 python-multipart==0.0.17
-slowapi==0.1.9
-python-dotenv==1.0.1
 
 # === HTTP CLIENT PARA IA EXTERNA ===
 aiohttp==3.9.1
