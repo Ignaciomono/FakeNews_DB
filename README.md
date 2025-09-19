@@ -2,29 +2,33 @@
 
 Backend completo para detección de fake news construido con **FastAPI** y **PostgreSQL**. Sistema listo para producción con análisis de IA integrado.
 
-## 🚀 INICIO RÁPIDO
+## 🚀 INSTALACIÓN SIMPLIFICADA
 
-### Opción 1: Instalación Automática (Recomendado)
+### ⚡ Una Sola Instalación - Todo Incluido
 ```bash
-# Ejecutar instalador completo
-.\install_step_by_step.bat
+# Ejecutar instalador completo que configura todo automáticamente
+.\install.bat
 ```
 
-### Opción 2: Inicio Directo (Si ya está instalado)
+Este comando único:
+- ✅ Verifica Python y PostgreSQL
+- ✅ Crea entorno virtual
+- ✅ Instala todas las dependencias
+- ✅ Configura la base de datos
+- ✅ Ejecuta migraciones
+- ✅ Inicia el servidor
+- ✅ Ejecuta pruebas de verificación
+
+### 🧪 Probar el Sistema de IA
 ```bash
-# Iniciar servidor
-.\start.bat
+# Ejecutar test completo del sistema de IA
+python test_ai.py
 ```
 
-### Opción 3: Manual
+### ⚡ Inicio Rápido (Si ya está instalado)
 ```bash
-# 1. Activar entorno virtual
+# Activar entorno y ejecutar servidor
 venv\Scripts\activate
-
-# 2. Crear tablas en PostgreSQL
-alembic upgrade head
-
-# 3. Iniciar servidor
 python main.py
 ```
 
@@ -115,13 +119,33 @@ BackEndSoft/
 │       └── content_extractor.py # Extracción de contenido web
 ├── alembic/               # Migraciones de base de datos
 ├── venv/                  # Entorno virtual de Python
-├── requirements.txt       # Dependencias completas
-├── requirements_basic.txt # Dependencias mínimas
+├── requirements.txt       # Dependencias Python
 ├── main.py               # Punto de entrada
+├── install.bat           # ⚡ INSTALADOR ÚNICO
+├── test_ai.py            # 🧪 TEST COMPLETO DE IA
 ├── .env                  # Variables de entorno
-├── start.bat             # Script de inicio rápido
-├── install_step_by_step.bat # Instalador automático
-└── test_api.bat          # Script de pruebas
+└── .gitignore            # Exclusiones de Git
+```
+
+## 🤖 Sistema de IA Integrado
+
+El backend incluye análisis real de IA con:
+- **Modelo Principal:** `martin-ha/toxic-comment-model` de Hugging Face
+- **Extracción Web:** `newspaper3k` para URLs de noticias
+- **Sistema Fallback:** Análisis mock para desarrollo/pruebas
+- **Cache Inteligente:** Optimización automática de rendimiento
+
+### Probar Sistema de IA
+```bash
+# Ejecutar test completo
+python test_ai.py
+
+# El test incluye:
+# ✅ Verificación de dependencias
+# ✅ Carga de modelos de IA
+# ✅ Análisis de texto real
+# ✅ Test de APIs endpoints
+# ✅ Benchmarks de rendimiento
 ```
 
 ## 🔗 API Endpoints
@@ -142,30 +166,41 @@ BackEndSoft/
 
 ## 🧪 Probar la API
 
-### Análisis de Texto
+### Análisis de Texto Directo
 ```bash
 curl -X POST "http://localhost:8000/analyze" \
   -H "Content-Type: application/json" \
   -d '{"content": "Esta noticia parece falsa", "source_type": "text"}'
 ```
 
-### Análisis de URL
+### Análisis de URL de Noticia
 ```bash
 curl -X POST "http://localhost:8000/analyze" \
   -H "Content-Type: application/json" \
   -d '{"content": "https://ejemplo.com/noticia", "source_type": "url"}'
 ```
 
-### Script de Pruebas Automáticas
+### Test Completo del Sistema
 ```bash
-.\test_api.bat
+# Ejecutar todas las pruebas de IA y API
+python test_ai.py
 ```
 
-## 🚀 Despliegue
+## 🚀 Despliegue y Desarrollo
 
-### Desarrollo
+### Para Empezar (Nueva Instalación)
 ```bash
-.\start.bat
+# Ejecutar una sola vez para configurar todo
+.\install.bat
+```
+
+### Uso Diario (Desarrollo)
+```bash
+# Activar entorno virtual
+venv\Scripts\activate
+
+# Iniciar servidor
+python main.py
 ```
 
 ### Producción
@@ -199,8 +234,8 @@ alembic upgrade head
 
 ### Ejecutar Pruebas
 ```bash
-# Pruebas rápidas
-.\test_api.bat
+# Test completo del sistema de IA
+python test_ai.py
 
 # Verificar salud del sistema
 curl http://localhost:8000/health
@@ -214,8 +249,8 @@ curl http://localhost:8000/health
 3. Confirmar que la base de datos `fakenews_db` existe
 
 ### Error de Modelo de IA
-- El sistema usa un modelo MOCK por defecto para pruebas
-- Para IA real: `pip install transformers torch newspaper3k`
+- El sistema usa modelos reales de Hugging Face con fallback mock
+- Si hay problemas: `python test_ai.py` para diagnóstico completo
 
 ### Puerto ya en uso
 ```bash
@@ -225,13 +260,14 @@ netstat -ano | findstr :8000
 taskkill /PID <process_id> /F
 ```
 
-## 📝 Notas
+## 📝 Características Destacadas
 
-- **Modo MOCK:** Por defecto, el sistema usa un modelo simulado para pruebas rápidas
-- **CORS:** Configurado para React en `http://localhost:3000`
-- **Rate Limiting:** 100 solicitudes por minuto por IP
-- **Archivos:** Máximo 10MB por archivo
-- **Logs:** Se guardan en consola con nivel INFO
+- **✅ Instalación Simplificada:** Un solo comando `install.bat` configura todo
+- **🧪 Testing Integrado:** `test_ai.py` verifica todo el sistema de IA
+- **🤖 IA Real:** Modelos de Hugging Face con análisis profesional
+- **⚡ Rendimiento:** Sistema asíncrono optimizado para producción
+- **🔒 Seguridad:** Rate limiting, validación y sanitización integrada
+- **📊 Métricas:** Estadísticas completas y monitoreo del sistema
 
 ## 🤝 Contribuir
 

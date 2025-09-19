@@ -90,14 +90,14 @@ class AIAnalyzer:
                 "text-classification",
                 model=model,
                 tokenizer=tokenizer,
-                return_all_scores=True
+                top_k=1  # Solo el resultado top
             )
         else:
             # Modelo alternativo
             pipe = pipeline(
                 "text-classification",
                 model=model_name,
-                return_all_scores=True
+                top_k=1  # Solo el resultado top
             )
             tokenizer = pipe.tokenizer
             model = pipe.model
@@ -117,12 +117,12 @@ class AIAnalyzer:
         self.is_loaded = True
         logger.warning("Usando modelo mock para análisis")
     
-    async def analyze_text(self, text: str) -> Tuple[float, AnalysisLabel, float, int]:
+    async def analyze_text(self, text: str) -> Dict:
         """
-        Analiza un texto y retorna el resultado.
+        Analiza un texto y retorna el resultado en formato dict.
         
         Returns:
-            Tuple[float, AnalysisLabel, float, int]: (score, label, confidence, tiempo_ms)
+            Dict: {"score": float, "label": str, "confidence": float, "model_used": str}
         """
         if not self.is_loaded:
             await self.initialize()
@@ -131,20 +131,33 @@ class AIAnalyzer:
         
         try:
             if self.pipeline == "mock":
-                result = await self._mock_analysis(text)
+                score, label, confidence = await self._mock_analysis(text)
+                model_used = "mock-model"
             else:
-                result = await self._real_analysis(text)
+                score, label, confidence = await self._real_analysis(text)
+                model_used = self.model_name
             
             processing_time = int((time.time() - start_time) * 1000)
             
-            score, label, confidence = result
-            return score, label, confidence, processing_time
+            return {
+                "score": score,
+                "label": label.value if hasattr(label, 'value') else str(label),
+                "confidence": confidence,
+                "model_used": model_used,
+                "processing_time_ms": processing_time
+            }
             
         except Exception as e:
             logger.error(f"Error en análisis de IA: {e}")
             # Retornar resultado por defecto en caso de error
             processing_time = int((time.time() - start_time) * 1000)
-            return 0.5, AnalysisLabel.UNCERTAIN, 0.1, processing_time
+            return {
+                "score": 0.5,
+                "label": AnalysisLabel.UNCERTAIN.value,
+                "confidence": 0.1,
+                "model_used": "error-fallback",
+                "processing_time_ms": processing_time
+            }
     
     async def _real_analysis(self, text: str) -> Tuple[float, AnalysisLabel, float]:
         """Análisis real usando el modelo cargado"""
@@ -173,29 +186,56 @@ class AIAnalyzer:
     def _interpret_results(self, results) -> Tuple[float, AnalysisLabel, float]:
         """Interpreta los resultados del modelo para fake news detection"""
         
-        if isinstance(results, list) and len(results) > 0:
-            # Si tenemos múltiples scores, tomamos el más alto
-            best_result = max(results, key=lambda x: x['score'])
-            
-            # Adaptamos el resultado para fake news
-            # Esto es una simplificación - en producción necesitarías un modelo específico
-            label = best_result['label'].upper()
-            confidence = best_result['score']
-            
-            # Mapear labels a nuestro sistema
-            if 'TOXIC' in label or 'NEGATIVE' in label:
-                # Contenido tóxico/negativo puede indicar fake news
-                score = 1.0 - confidence  # Invertir para que 0 = fake, 1 = real
-                predicted_label = AnalysisLabel.FAKE if confidence > 0.7 else AnalysisLabel.UNCERTAIN
+        try:
+            # El pipeline puede retornar diferentes formatos
+            if isinstance(results, list):
+                if len(results) > 0:
+                    # Si es una lista de resultados, tomar el primero o el de mayor score
+                    if isinstance(results[0], dict):
+                        # Formato: [{'label': 'POSITIVE', 'score': 0.99}]
+                        best_result = max(results, key=lambda x: x['score']) if len(results) > 1 else results[0]
+                    else:
+                        # Formato alternativo
+                        best_result = results[0]
+                else:
+                    # Lista vacía
+                    return 0.5, AnalysisLabel.UNCERTAIN, 0.1
+            elif isinstance(results, dict):
+                # Resultado directo en formato dict
+                best_result = results
             else:
-                # Contenido no tóxico puede ser más confiable
+                # Formato desconocido
+                logger.warning(f"Formato de resultado desconocido: {type(results)}")
+                return 0.5, AnalysisLabel.UNCERTAIN, 0.1
+            
+            # Extraer información del resultado
+            label = str(best_result.get('label', 'UNKNOWN')).upper()
+            confidence = float(best_result.get('score', 0.5))
+            
+            # Mapear labels a nuestro sistema de fake news
+            # Esto es una adaptación - idealmente necesitarías un modelo específico para fake news
+            if 'TOXIC' in label or 'NEGATIVE' in label or 'HATE' in label:
+                # Contenido tóxico/negativo/hate puede indicar mayor probabilidad de fake news
+                score = 1.0 - confidence  # Invertir: contenido tóxico = más probable fake
+                predicted_label = AnalysisLabel.FAKE if confidence > 0.6 else AnalysisLabel.UNCERTAIN
+            elif 'POSITIVE' in label or 'NON_TOXIC' in label:
+                # Contenido positivo/no tóxico puede ser más confiable
                 score = confidence
-                predicted_label = AnalysisLabel.REAL if confidence > 0.7 else AnalysisLabel.UNCERTAIN
+                predicted_label = AnalysisLabel.REAL if confidence > 0.6 else AnalysisLabel.UNCERTAIN
+            else:
+                # Label desconocido
+                score = 0.5
+                predicted_label = AnalysisLabel.UNCERTAIN
+            
+            # Asegurar que el score esté en rango válido
+            score = max(0.0, min(1.0, score))
+            confidence = max(0.0, min(1.0, confidence))
             
             return score, predicted_label, confidence
-        
-        # Resultado por defecto
-        return 0.5, AnalysisLabel.UNCERTAIN, 0.1
+            
+        except Exception as e:
+            logger.error(f"Error interpretando resultados: {e}")
+            return 0.5, AnalysisLabel.UNCERTAIN, 0.1
     
     async def _mock_analysis(self, text: str) -> Tuple[float, AnalysisLabel, float]:
         """Análisis mock para development"""
@@ -221,6 +261,51 @@ class AIAnalyzer:
             label = AnalysisLabel.UNCERTAIN
         
         return score, label, confidence
+    
+    async def analyze_url(self, url: str) -> Dict:
+        """
+        Analiza una URL extrayendo el contenido y analizándolo.
+        
+        Args:
+            url: URL a analizar
+            
+        Returns:
+            Dict: Resultado del análisis
+        """
+        try:
+            # Importar el extractor de contenido
+            from app.utils.content_extractor import ContentExtractor
+            
+            extractor = ContentExtractor()
+            content = await extractor.extract_from_url(url)
+            
+            if not content.get('text'):
+                return {
+                    "score": 0.5,
+                    "label": AnalysisLabel.UNCERTAIN.value,
+                    "confidence": 0.1,
+                    "model_used": "no-content",
+                    "processing_time_ms": 0,
+                    "error": "No se pudo extraer contenido de la URL"
+                }
+            
+            # Analizar el texto extraído
+            result = await self.analyze_text(content['text'])
+            result['url'] = url
+            result['title'] = content.get('title', '')
+            
+            return result
+            
+        except Exception as e:
+            logger.error(f"Error analizando URL {url}: {e}")
+            return {
+                "score": 0.5,
+                "label": AnalysisLabel.UNCERTAIN.value,
+                "confidence": 0.1,
+                "model_used": "error",
+                "processing_time_ms": 0,
+                "error": str(e)
+            }
     
     def get_model_info(self) -> Dict:
         """Retorna información del modelo actual"""

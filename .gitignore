@@ -1,160 +1,316 @@
-# Python
+# === FAKENEWS_DB PROJECT GITIGNORE ===# Python
+
 __pycache__/
-*.py[cod]
-*$py.class
-*.so
-.Python
-build/
-develop-eggs/
-dist/
+
+# Environment variables and secrets*.py[cod]
+
+.env*$py.class
+
+.env.local*.so
+
+.env.*.local.Python
+
+*.keybuild/
+
+*.pemdevelop-eggs/
+
+secrets/dist/
+
 downloads/
-eggs/
-.eggs/
-lib/
+
+# Python cache and bytecodeeggs/
+
+__pycache__/.eggs/
+
+*.py[cod]lib/
+
+*$py.classlib64/
+
+*.soparts/
+
+.Pythonsdist/
+
+build/var/
+
+develop-eggs/wheels/
+
+dist/share/python-wheels/
+
+downloads/*.egg-info/
+
+eggs/.installed.cfg
+
+.eggs/*.egg
+
+lib/MANIFEST
+
 lib64/
-parts/
-sdist/
-var/
+
+parts/# PyInstaller
+
+sdist/*.manifest
+
+var/*.spec
+
 wheels/
-share/python-wheels/
-*.egg-info/
-.installed.cfg
+
+share/python-wheels/# Installer logs
+
+*.egg-info/pip-log.txt
+
+.installed.cfgpip-delete-this-directory.txt
+
 *.egg
-MANIFEST
 
-# PyInstaller
-*.manifest
-*.spec
+MANIFEST# Unit test / coverage reports
 
-# Installer logs
-pip-log.txt
-pip-delete-this-directory.txt
-
-# Unit test / coverage reports
 htmlcov/
-.tox/
-.nox/
-.coverage
-.coverage.*
-.cache
-nosetests.xml
-coverage.xml
-*.cover
+
+# Virtual environments.tox/
+
+venv/.nox/
+
+env/.coverage
+
+ENV/.coverage.*
+
+env.bak/.cache
+
+venv.bak/nosetests.xml
+
+.venv/coverage.xml
+
+.env/*.cover
+
 *.py,cover
-.hypothesis/
-.pytest_cache/
-cover/
 
-# Translations
-*.mo
-*.pot
+# IDEs and editors.hypothesis/
 
-# Django stuff:
-*.log
+.vscode/.pytest_cache/
+
+.idea/cover/
+
+*.swp
+
+*.swo# Translations
+
+*~*.mo
+
+.project*.pot
+
+.classpath
+
+.settings/# Django stuff:
+
+*.sublime-**.log
+
 local_settings.py
-db.sqlite3
-db.sqlite3-journal
 
-# Flask stuff:
-instance/
-.webassets-cache
+# OS generated filesdb.sqlite3
 
-# Scrapy stuff:
-.scrapy
+.DS_Storedb.sqlite3-journal
 
-# Sphinx documentation
-docs/_build/
+.DS_Store?
 
-# PyBuilder
-.pybuilder/
-target/
+._*# Flask stuff:
 
-# Jupyter Notebook
-.ipynb_checkpoints
+.Spotlight-V100instance/
 
-# IPython
-profile_default/
-ipython_config.py
+.Trashes.webassets-cache
 
-# pyenv
+ehthumbs.db
+
+Thumbs.db# Scrapy stuff:
+
+desktop.ini.scrapy
+
+
+
+# FastAPI and web frameworks# Sphinx documentation
+
+*.logdocs/_build/
+
+logs/
+
+.coverage# PyBuilder
+
+.pytest_cache/.pybuilder/
+
+.tox/target/
+
+.nox/
+
+.coverage.*# Jupyter Notebook
+
+htmlcov/.ipynb_checkpoints
+
+.cache
+
+nosetests.xml# IPython
+
+coverage.xmlprofile_default/
+
+*.coveripython_config.py
+
+*.py,cover
+
+.hypothesis/# pyenv
+
 .python-version
 
-# pipenv
-Pipfile.lock
+# Database files
 
-# poetry
-poetry.lock
+*.db# pipenv
 
-# pdm
-.pdm.toml
+*.sqlitePipfile.lock
 
-# PEP 582
+*.sqlite3
+
+db.sqlite3# poetry
+
+database.dbpoetry.lock
+
+
+
+# PostgreSQL# pdm
+
+*.sql.pdm.toml
+
+pg_log/
+
+postgresql.log# PEP 582
+
 __pypackages__/
 
-# Celery stuff
-celerybeat-schedule
-celerybeat.pid
+# AI Models and data
 
-# SageMath parsed files
-*.sage.py
+models/# Celery stuff
 
-# Environments
-.env
-.venv
-env/
-venv/
-ENV/
+*.modelcelerybeat-schedule
+
+*.pklcelerybeat.pid
+
+*.joblib
+
+*.h5# SageMath parsed files
+
+*.hdf5*.sage.py
+
+*.onnx
+
+*.pb# Environments
+
+data/.env
+
+datasets/.venv
+
+checkpoints/env/
+
+cache/venv/
+
+.cache/ENV/
+
 env.bak/
-venv.bak/
 
-# Spyder project settings
-.spyderproject
+# Hugging Face cachevenv.bak/
+
+.transformers_cache/
+
+.huggingface/# Spyder project settings
+
+transformers_cache/.spyderproject
+
 .spyproject
 
-# Rope project settings
-.ropeproject
+# PyTorch cache
 
-# mkdocs documentation
-/site
+.torch/# Rope project settings
 
-# mypy
-.mypy_cache/
-.dmypy.json
+torch_cache/.ropeproject
+
+
+
+# Temporary files# mkdocs documentation
+
+temp//site
+
+tmp/
+
+*.tmp# mypy
+
+*.temp.mypy_cache/
+
+.temp/.dmypy.json
+
 dmypy.json
 
-# Pyre type checker
-.pyre/
+# Test outputs
+
+test_results/# Pyre type checker
+
+test_reports/.pyre/
+
+.pytest_cache/
 
 # pytype static type analyzer
-.pytype/
 
-# Cython debug symbols
+# Documentation builds.pytype/
+
+docs/_build/
+
+site/# Cython debug symbols
+
 cython_debug/
 
-# PyCharm
-.idea/
+# Package files
+
+*.tar.gz# PyCharm
+
+*.zip.idea/
+
+*.rar
 
 # VS Code
-.vscode/
-*.code-workspace
+
+# Jupyter Notebooks.vscode/
+
+.ipynb_checkpoints/*.code-workspace
+
+*.ipynb
 
 # Vim
-*.swp
-*.swo
+
+# Node.js (if using for frontend)*.swp
+
+node_modules/*.swo
+
+npm-debug.log**~
+
+yarn-debug.log*
+
+yarn-error.log*# Emacs
+
 *~
 
-# Emacs
-*~
-\#*\#
-/.emacs.desktop
-/.emacs.desktop.lock
-*.elc
+# Backup files\#*\#
+
+*.bak/.emacs.desktop
+
+*.backup/.emacs.desktop.lock
+
+*~*.elc
+
 auto-save-list
-tramp
-.\#*
 
-# OS generated files
-.DS_Store
+# Custom exclusions for this projecttramp
+
+test_outputs/.\#*
+
+performance_logs/
+
+analysis_cache/# OS generated files
+
+backup/.DS_Store
 .DS_Store?
 ._*
 .Spotlight-V100
