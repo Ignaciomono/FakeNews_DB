@@ -16,7 +16,7 @@ logging.basicConfig(
 )
 logger = logging.getLogger(__name__)
 
-# Crear aplicación FastAPI
+# Crear aplicación FastAPI con configuración especial para Vercel
 app = FastAPI(
     title="Fake News Detector API",
     description="""
@@ -45,8 +45,18 @@ app = FastAPI(
     license_info={
         "name": "MIT",
     },
-    docs_url="/docs",
-    redoc_url="/redoc"
+    # Deshabilitar docs automático para usar versión personalizada
+    docs_url=None,
+    redoc_url="/redoc",
+    # Configuración específica para Vercel
+    openapi_url=None,  # Lo manejaremos manualmente
+    swagger_ui_parameters={
+        "deepLinking": True,
+        "displayRequestDuration": True,
+        "tryItOutEnabled": True,
+        "operationsSorter": "method",
+        "docExpansion": "none"
+    }
 )
 
 # Configurar CORS para React
@@ -172,6 +182,35 @@ async def http_exception_handler(request: Request, exc: HTTPException):
             "status_code": exc.status_code
         }
     )
+
+# Workaround específico para Vercel - Swagger UI
+from fastapi.openapi.docs import get_swagger_ui_html
+from fastapi.openapi.utils import get_openapi
+
+@app.get("/docs", include_in_schema=False)
+async def custom_swagger_ui_html():
+    """Swagger UI personalizado para compatibilidad con Vercel"""
+    return get_swagger_ui_html(
+        openapi_url="/openapi.json",
+        title=app.title + " - Swagger UI",
+        swagger_js_url="https://cdn.jsdelivr.net/npm/swagger-ui-dist@5.9.0/swagger-ui-bundle.js",
+        swagger_css_url="https://cdn.jsdelivr.net/npm/swagger-ui-dist@5.9.0/swagger-ui.css",
+        swagger_ui_parameters=app.swagger_ui_parameters,
+    )
+
+@app.get("/openapi.json", include_in_schema=False)
+async def custom_openapi():
+    """OpenAPI schema personalizado"""
+    if app.openapi_schema:
+        return app.openapi_schema
+    openapi_schema = get_openapi(
+        title=app.title,
+        version=app.version,
+        description=app.description,
+        routes=app.routes,
+    )
+    app.openapi_schema = openapi_schema
+    return openapi_schema
 
 if __name__ == "__main__":
     import uvicorn
