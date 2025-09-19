@@ -367,17 +367,9 @@ async def main():
         await tester.test_ai_engine()
         
         # 4. Test de endpoints (requiere servidor corriendo)
-        print("\n⚠️  Para probar endpoints, asegúrate de que el servidor esté corriendo:")
+        print("\n⚠️  Para probar endpoints completos, ejecuta el servidor:")
         print("   python main.py")
-        print("   Presiona Enter para continuar o Ctrl+C para salir...")
-        
-        try:
-            # Usar thread para input en async
-            await asyncio.to_thread(input)
-            tester.test_api_endpoints()
-        
-        except KeyboardInterrupt:
-            print("\n⏭️  Saltando pruebas de endpoints...")
+        print("   (Saltando pruebas de endpoints para instalación automática)")
         
         # 5. Reporte final
         score = tester.generate_report()

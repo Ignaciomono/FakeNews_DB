@@ -1,180 +1,356 @@
-# === FAKENEWS_DB PROJECT GITIGNORE ===
+# === FAKENEWS_DB PROJECT GITIGNORE ===# === FAKENEWS_DB PROJECT GITIGNORE ===
+
+# Gitignore optimizado para FastAPI + PostgreSQL + Hugging Face API externa
 
 # Environment variables and secrets
-.env
-.env.local
-.env.*.local
-.env.production
-*.key
-*.pem
+
+# === ENVIRONMENT VARIABLES AND SECRETS ===.env
+
+.env.env.local
+
+.env.local.env.*.local
+
+.env.*.local.env.production
+
+.env.production*.key
+
+*.key*.pem
+
+*.pemsecrets/
+
 secrets/
 
 # Python cache and bytecode
-__pycache__/
-*.py[cod]
-*$py.class
-*.so
-.Python
-build/
-develop-eggs/
-dist/
+
+# === PYTHON CACHE AND BYTECODE ===__pycache__/
+
+__pycache__/*.py[cod]
+
+*.py[cod]*$py.class
+
+*$py.class*.so
+
+*.so.Python
+
+.Pythonbuild/
+
+build/develop-eggs/
+
+develop-eggs/dist/
+
+dist/downloads/
+
 downloads/
 
-# Python cache and bytecodeeggs/
+eggs/# Python cache and bytecodeeggs/
 
-__pycache__/.eggs/
+.eggs/
 
-*.py[cod]lib/
-
-*$py.classlib64/
-
-*.soparts/
-
-.Pythonsdist/
-
-build/var/
-
-develop-eggs/wheels/
-
-dist/share/python-wheels/
-
-downloads/*.egg-info/
-
-eggs/.installed.cfg
-
-.eggs/*.egg
-
-lib/MANIFEST
+lib/__pycache__/.eggs/
 
 lib64/
 
-parts/# PyInstaller
+parts/*.py[cod]lib/
 
-sdist/*.manifest
+sdist/
 
-var/*.spec
+var/*$py.classlib64/
 
 wheels/
 
-share/python-wheels/# Installer logs
+share/python-wheels/*.soparts/
 
-*.egg-info/pip-log.txt
+*.egg-info/
 
-.installed.cfgpip-delete-this-directory.txt
+.installed.cfg.Pythonsdist/
 
 *.egg
 
-MANIFEST# Unit test / coverage reports
+MANIFESTbuild/var/
 
-htmlcov/
 
-# Virtual environments.tox/
 
-venv/.nox/
+# === VIRTUAL ENVIRONMENTS ===develop-eggs/wheels/
 
-env/.coverage
+venv/
 
-ENV/.coverage.*
+env/dist/share/python-wheels/
 
-env.bak/.cache
+ENV/
 
-venv.bak/nosetests.xml
+env.bak/downloads/*.egg-info/
 
-.venv/coverage.xml
+venv.bak/
 
-.env/*.cover
+.venv/eggs/.installed.cfg
 
-*.py,cover
 
-# IDEs and editors.hypothesis/
 
-.vscode/.pytest_cache/
+# === IDES AND EDITORS ===.eggs/*.egg
 
-.idea/cover/
+.vscode/
+
+.idea/lib/MANIFEST
 
 *.swp
 
-*.swo# Translations
+*.swolib64/
 
-*~*.mo
+*~
 
-.project*.pot
+.projectparts/# PyInstaller
 
 .classpath
 
-.settings/# Django stuff:
+.settings/sdist/*.manifest
 
-*.sublime-**.log
+*.sublime-*
 
-local_settings.py
+var/*.spec
 
-# OS generated filesdb.sqlite3
+# === OS GENERATED FILES ===
 
-.DS_Storedb.sqlite3-journal
+.DS_Storewheels/
 
 .DS_Store?
 
-._*# Flask stuff:
+._*share/python-wheels/# Installer logs
 
-.Spotlight-V100instance/
+.Spotlight-V100
 
-.Trashes.webassets-cache
+.Trashes*.egg-info/pip-log.txt
 
 ehthumbs.db
 
-Thumbs.db# Scrapy stuff:
+Thumbs.db.installed.cfgpip-delete-this-directory.txt
 
-desktop.ini.scrapy
+desktop.ini
 
+*.egg
 
+# === TESTING AND COVERAGE ===
 
-# FastAPI and web frameworks# Sphinx documentation
-
-*.logdocs/_build/
-
-logs/
-
-.coverage# PyBuilder
-
-.pytest_cache/.pybuilder/
-
-.tox/target/
+.tox/MANIFEST# Unit test / coverage reports
 
 .nox/
 
-.coverage.*# Jupyter Notebook
+.coveragehtmlcov/
 
-htmlcov/.ipynb_checkpoints
+.coverage.*
 
-.cache
+.cache# Virtual environments.tox/
 
-nosetests.xml# IPython
+nosetests.xml
 
-coverage.xmlprofile_default/
+coverage.xmlvenv/.nox/
 
-*.coveripython_config.py
+*.cover
 
-*.py,cover
+*.py,coverenv/.coverage
 
-.hypothesis/# pyenv
+.hypothesis/
 
-.python-version
+.pytest_cache/ENV/.coverage.*
 
-# Database files
+htmlcov/
 
-*.db# pipenv
+env.bak/.cache
 
-*.sqlitePipfile.lock
+# === DOCUMENTATION ===
+
+docs/_build/venv.bak/nosetests.xml
+
+
+
+# === DATABASE FILES ===.venv/coverage.xml
+
+*.db
+
+*.sqlite.env/*.cover
 
 *.sqlite3
 
-db.sqlite3# poetry
+db.sqlite3*.py,cover
+
+database.db
+
+postgresql.log# IDEs and editors.hypothesis/
+
+pg_log/
+
+.vscode/.pytest_cache/
+
+# === LOGS ===
+
+*.log.idea/cover/
+
+logs/
+
+*.swp
+
+# === FASTAPI SPECIFIC ===
+
+.pytest_cache/*.swo# Translations
+
+
+
+# === JUPYTER NOTEBOOK ===*~*.mo
+
+.ipynb_checkpoints
+
+.project*.pot
+
+# === TRANSLATIONS ===
+
+*.mo.classpath
+
+*.pot
+
+.settings/# Django stuff:
+
+# === DJANGO (if mixed project) ===
+
+local_settings.py*.sublime-**.log
+
+db.sqlite3-journal
+
+local_settings.py
+
+# === FLASK (if mixed project) ===
+
+instance/# OS generated filesdb.sqlite3
+
+.webassets-cache
+
+.DS_Storedb.sqlite3-journal
+
+# === SCRAPY ===
+
+.scrapy.DS_Store?
+
+
+
+# === SPHINX DOCUMENTATION ===._*# Flask stuff:
+
+docs/_build/
+
+.Spotlight-V100instance/
+
+# === PYBUILDER ===
+
+.pybuilder/.Trashes.webassets-cache
+
+target/
+
+ehthumbs.db
+
+# === PYENV ===
+
+.python-versionThumbs.db# Scrapy stuff:
+
+
+
+# === PIPENV ===desktop.ini.scrapy
+
+Pipfile.lock
+
+
+
+# === POETRY ===
+
+poetry.lock# FastAPI and web frameworks# Sphinx documentation
+
+
+
+# === PDM ===*.logdocs/_build/
+
+.pdm.toml
+
+logs/
+
+# === PEP 582 ===
+
+__pypackages__/.coverage# PyBuilder
+
+
+
+# === CELERY ===.pytest_cache/.pybuilder/
+
+celerybeat-schedule
+
+celerybeat.pid.tox/target/
+
+
+
+# === AI MODELS AND DATA (No needed for external API) ===.nox/
+
+# models/
+
+# *.model.coverage.*# Jupyter Notebook
+
+# *.pkl
+
+# *.joblibhtmlcov/.ipynb_checkpoints
+
+# *.h5
+
+# *.hdf5.cache
+
+
+
+# === SAGEMATH ===nosetests.xml# IPython
+
+*.sage.py
+
+coverage.xmlprofile_default/
+
+# === DEPLOYMENT ===
+
+.vercel*.coveripython_config.py
+
+
+
+# === PROJECT SPECIFIC ===*.py,cover
+
+# Temporary files
+
+temp/.hypothesis/# pyenv
+
+tmp/
+
+*.tmp.python-version
+
+
+
+# Local backup files# Database files
+
+*.bak
+
+*.backup*.db# pipenv
+
+
+
+# Local development files*.sqlitePipfile.lock
+
+dev/
+
+local/*.sqlite3
+
+
+
+# === HUGGING FACE CACHE (Optional) ===db.sqlite3# poetry
+
+# .cache/huggingface/
 
 database.dbpoetry.lock
 
+# === LARGE FILES (Git LFS should be used) ===
 
+*.zip
 
-# PostgreSQL# pdm
+*.tar.gz
+
+*.rar# PostgreSQL# pdm
 
 *.sql.pdm.toml
 

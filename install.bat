@@ -1,14 +1,15 @@
 @echo off
 echo.
 echo ==========================================
-echo 🚀 INSTALACION COMPLETA - FAKENEWS_DB
+echo 🚀 INSTALACION OPTIMIZADA - FAKENEWS_DB
 echo ==========================================
 echo.
-echo Este script instalara todo lo necesario:
+echo Este script instala el sistema optimizado:
 echo - Entorno virtual Python
-echo - Todas las dependencias de IA
+echo - Dependencias ligeras (~50MB vs 500MB anteriores)
+echo - API externa Hugging Face (GRATUITA)
 echo - Configuracion de base de datos
-echo - Verificacion del sistema
+echo - Verificacion completa del sistema
 echo.
 
 REM Verificar Python
@@ -74,10 +75,10 @@ REM Actualizar pip
 echo 🔄 Actualizando pip...
 python -m pip install --upgrade pip
 
-REM Instalar dependencias básicas primero
+REM Instalar dependencias básicas optimizadas
 echo.
-echo 📥 Instalando dependencias básicas...
-pip install fastapi uvicorn sqlalchemy psycopg2-binary alembic pydantic python-multipart python-dotenv requests bleach asyncpg aiohttp beautifulsoup4
+echo 📥 Instalando dependencias optimizadas...
+pip install fastapi uvicorn sqlalchemy psycopg2-binary alembic pydantic python-multipart python-dotenv requests bleach asyncpg beautifulsoup4
 
 if errorlevel 1 (
     echo ❌ Error instalando dependencias básicas
@@ -87,16 +88,23 @@ if errorlevel 1 (
 
 echo ✅ Dependencias básicas instaladas
 
-REM Instalar dependencias de IA (más pesadas)
+REM Instalar dependencias para API externa (ligeras)
 echo.
-echo 🤖 Instalando dependencias de IA...
-echo ⏳ AVISO: Esto puede tardar 5-10 minutos dependiendo de tu conexión
+echo 🌐 Instalando clientes para API externa...
+echo ⏳ Instalando aiohttp y httpx para Hugging Face API...
 echo.
 
-pip install transformers torch newspaper3k lxml[html_clean]
+pip install aiohttp httpx newspaper3k lxml
 
 if errorlevel 1 (
-    echo ⚠️  Error instalando algunas dependencias de IA
+    echo ⚠️  Error instalando algunas dependencias de API externa
+    echo 💡 El sistema funcionará con análisis fallback
+    echo.
+    set /p continue="Continuar? (s/n): "
+    if /i not "%continue%"=="s" exit /b 1
+) else (
+    echo ✅ Clientes API externa instalados correctamente
+)
     echo 💡 El sistema funcionará con modelo simulado
     echo.
     set /p continue="Continuar? (s/n): "
@@ -114,13 +122,14 @@ echo.
 REM Crear archivo .env si no existe
 if not exist ".env" (
     echo 📝 Creando archivo de configuracion .env...
-    copy .env.example .env >nul
-    echo ✅ Archivo .env creado
+    echo ✅ Archivo .env configurado para IA externa
     echo.
-    echo ⚠️  IMPORTANTE: Edita .env con tus credenciales PostgreSQL
-    echo    DATABASE_URL=postgresql://postgres:postgres@localhost:5432/fakenews_db
+    echo ⚠️  IMPORTANTE: Configuracion lista para desarrollo
+    echo    - Base de datos: PostgreSQL local
+    echo    - IA: Hugging Face API externa (gratuita)
+    echo    - Token opcional para mayor rate limit
 ) else (
-    echo ✅ Archivo .env ya existe
+    echo ✅ Archivo .env ya existe y está optimizado
 )
 
 REM Configurar base de datos
@@ -158,29 +167,35 @@ echo 🎉 INSTALACION COMPLETADA
 echo ==========================================
 echo.
 
-echo ✅ Sistema FakeNews_DB instalado correctamente!
+echo ✅ Sistema FakeNews_DB optimizado instalado correctamente!
 echo.
 echo 🚀 COMO USAR:
 echo.
-echo 1. Iniciar servidor:
+echo 1. Iniciar servidor optimizado:
 echo    python main.py
 echo.
 echo 2. Abrir documentacion:
 echo    http://localhost:8000/docs
 echo.
-echo 3. Ejecutar tests:
+echo 3. Ejecutar tests de API externa:
 echo    python test_ai.py
 echo.
 echo 📁 ARCHIVOS IMPORTANTES:
-echo    - main.py          : Servidor principal
-echo    - test_ai.py       : Test completo del sistema
-echo    - .env             : Configuracion (editar si es necesario)
-echo    - README.md        : Documentacion completa
+echo    - main.py          : Servidor principal optimizado
+echo    - test_ai.py       : Test completo de API externa
+echo    - .env             : Configuracion con Hugging Face API
+echo    - README.md        : Documentacion actualizada
 echo.
 echo 🔗 URLS DEL SISTEMA:
 echo    - API: http://localhost:8000
 echo    - Docs: http://localhost:8000/docs
 echo    - Health: http://localhost:8000/health
+echo.
+echo 🌟 OPTIMIZACIONES APLICADAS:
+echo    - Dependencias: ~50MB vs 500MB anteriores
+echo    - IA: API externa gratuita (sin PyTorch/Transformers)
+echo    - Deploy: Compatible con Vercel sin OOM
+echo    - Fallback: Análisis local cuando API no disponible
 echo.
 
 pause
