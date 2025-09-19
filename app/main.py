@@ -1,6 +1,6 @@
 from fastapi import FastAPI, HTTPException, Request
 from fastapi.middleware.cors import CORSMiddleware
-from fastapi.responses import JSONResponse
+from fastapi.responses import JSONResponse, HTMLResponse
 import logging
 import time
 
@@ -183,20 +183,59 @@ async def http_exception_handler(request: Request, exc: HTTPException):
         }
     )
 
-# Workaround específico para Vercel - Swagger UI
-from fastapi.openapi.docs import get_swagger_ui_html
+# Solución directa para Swagger UI en Vercel
+from fastapi.responses import HTMLResponse
 from fastapi.openapi.utils import get_openapi
 
-@app.get("/docs", include_in_schema=False)
+@app.get("/docs", include_in_schema=False, response_class=HTMLResponse)
 async def custom_swagger_ui_html():
-    """Swagger UI personalizado para compatibilidad con Vercel"""
-    return get_swagger_ui_html(
-        openapi_url="/openapi.json",
-        title=app.title + " - Swagger UI",
-        swagger_js_url="https://cdn.jsdelivr.net/npm/swagger-ui-dist@5.9.0/swagger-ui-bundle.js",
-        swagger_css_url="https://cdn.jsdelivr.net/npm/swagger-ui-dist@5.9.0/swagger-ui.css",
-        swagger_ui_parameters=app.swagger_ui_parameters,
-    )
+    """Swagger UI completamente manual para Vercel"""
+    html_content = f"""
+    <!DOCTYPE html>
+    <html>
+    <head>
+        <title>{app.title} - Swagger UI</title>
+        <link rel="stylesheet" type="text/css" href="https://unpkg.com/swagger-ui-dist@5.9.0/swagger-ui.css" />
+        <style>
+            html {{
+                box-sizing: border-box;
+                overflow: -moz-scrollbars-vertical;
+                overflow-y: scroll;
+            }}
+            *, *:before, *:after {{
+                box-sizing: inherit;
+            }}
+            body {{
+                margin:0;
+                background: #fafafa;
+            }}
+        </style>
+    </head>
+    <body>
+        <div id="swagger-ui"></div>
+        <script src="https://unpkg.com/swagger-ui-dist@5.9.0/swagger-ui-bundle.js"></script>
+        <script src="https://unpkg.com/swagger-ui-dist@5.9.0/swagger-ui-standalone-preset.js"></script>
+        <script>
+            window.onload = function() {{
+                const ui = SwaggerUIBundle({{
+                    url: '/openapi.json',
+                    dom_id: '#swagger-ui',
+                    deepLinking: true,
+                    presets: [
+                        SwaggerUIBundle.presets.apis,
+                        SwaggerUIStandalonePreset
+                    ],
+                    plugins: [
+                        SwaggerUIBundle.plugins.DownloadUrl
+                    ],
+                    layout: "StandaloneLayout"
+                }});
+            }};
+        </script>
+    </body>
+    </html>
+    """
+    return HTMLResponse(content=html_content)
 
 @app.get("/openapi.json", include_in_schema=False)
 async def custom_openapi():
