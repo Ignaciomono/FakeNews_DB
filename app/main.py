@@ -49,7 +49,7 @@ app = FastAPI(
     docs_url=None,
     redoc_url="/redoc",
     # Configuración específica para Vercel
-    openapi_url=None,  # Lo manejaremos manualmente
+    openapi_url="/openapi.json",  # Habilitamos el endpoint automático
     swagger_ui_parameters={
         "deepLinking": True,
         "displayRequestDuration": True,
@@ -106,9 +106,9 @@ async def log_requests(request: Request, call_next):
     
     return response
 
-# Incluir routers
-app.include_router(analysis.router)
-app.include_router(metrics.router)
+# Incluir routers con prefijos para mejor organización
+app.include_router(analysis.router, prefix="/api")
+app.include_router(metrics.router, prefix="/api") 
 app.include_router(health.router)
 
 # Endpoints adicionales
@@ -398,17 +398,8 @@ async def swagger_ui_docs():
 
 @app.get("/openapi.json", include_in_schema=False)
 async def custom_openapi():
-    """OpenAPI schema personalizado"""
-    if app.openapi_schema:
-        return app.openapi_schema
-    openapi_schema = get_openapi(
-        title=app.title,
-        version=app.version,
-        description=app.description,
-        routes=app.routes,
-    )
-    app.openapi_schema = openapi_schema
-    return openapi_schema
+    """OpenAPI schema que incluye todos los endpoints"""
+    return app.openapi()
 
 if __name__ == "__main__":
     import uvicorn
