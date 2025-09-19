@@ -1,0 +1,35 @@
+# === DEPENDENCIAS CORE PARA VERCEL ===
+fastapi==0.116.0
+uvicorn[standard]==0.32.0
+pydantic==2.10.0
+pydantic-settings==2.6.0
+
+# === BASE DE DATOS ===
+sqlalchemy==2.0.36
+asyncpg==0.30.0
+alembic==1.14.0
+
+# === CORS Y MIDDLEWARE ===
+python-multipart==0.0.17
+slowapi==0.1.9
+python-dotenv==1.0.1
+
+# === PROCESAMIENTO DE CONTENIDO ===
+bleach==6.2.0
+beautifulsoup4==4.12.3
+lxml[html_clean]==5.3.0
+
+# === IA Y ANÁLISIS (VERSIONES LIGERAS) ===
+transformers==4.56.2
+torch==2.5.1+cpu --index-url https://download.pytorch.org/whl/cpu
+tokenizers==0.21.0
+huggingface-hub==0.26.2
+
+# === EXTRACCIÓN WEB ===
+newspaper3k==0.2.8
+requests==2.32.3
+urllib3==2.2.3
+
+# === UTILIDADES ===
+python-dateutil==2.9.0.post0
+typing-extensions==4.12.2

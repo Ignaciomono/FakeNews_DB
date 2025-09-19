@@ -2,6 +2,10 @@
 Punto de entrada principal para la aplicación Fake News Detector
 """
 
+# Importar la aplicación FastAPI para Vercel
+from app.main import app
+
+# Para desarrollo local
 if __name__ == "__main__":
     import uvicorn
     
