@@ -2,7 +2,7 @@
 
 Backend completo para detección de fake news construido con **FastAPI** y **PostgreSQL**. Sistema listo para producción con análisis de IA integrado.
 
-## 🚀 INSTALACIÓN SIMPLIFICADA
+## 🚀 INSTALACIÓN LOCAL
 
 ### ⚡ Una Sola Instalación - Todo Incluido
 ```bash
@@ -32,14 +32,49 @@ venv\Scripts\activate
 python main.py
 ```
 
+## 🌐 DEPLOY EN VERCEL
+
+### 📋 Variables de Entorno Requeridas
+En el dashboard de Vercel, configura estas variables:
+
+```bash
+PGHOST=tu-host-postgresql
+PGDATABASE=tu-database
+PGUSER=tu-usuario
+PGPASSWORD=tu-password
+PGSSLMODE=require
+
+SECRET_KEY=tu-clave-secreta-super-segura-para-produccion
+ENVIRONMENT=production
+MAX_FILE_SIZE_MB=10
+CORS_ORIGINS=https://tu-frontend.vercel.app
+```
+
+### ⚙️ Build and Output Settings
+```bash
+Build Command: (dejar vacío)
+Output Directory: (dejar vacío)
+Install Command: pip install -r requirements-vercel.txt
+```
+
+### 🔗 URLs Post-Deploy
+- **API Base**: `https://tu-app.vercel.app`
+- **Documentación**: `https://tu-app.vercel.app/docs`
+- **Health Check**: `https://tu-app.vercel.app/health`
+
 ## 🌐 URLs del Sistema
 
-Una vez ejecutándose:
+### Local (Desarrollo)
 - **🌍 API Principal:** http://localhost:8000
 - **📖 Documentación Interactiva:** http://localhost:8000/docs
 - **📋 Documentación Redoc:** http://localhost:8000/redoc
 - **💚 Estado de Salud:** http://localhost:8000/health
 - **📊 Información del Sistema:** http://localhost:8000/info
+
+### Producción (Vercel)
+- **🌍 API Principal:** https://tu-app.vercel.app
+- **📖 Documentación:** https://tu-app.vercel.app/docs
+- **� Health Check:** https://tu-app.vercel.app/health
 
 ## ✨ Características
 
@@ -51,6 +86,7 @@ Una vez ejecutándose:
 - **⚡ Async/Await:** Operaciones asíncronas para mejor rendimiento
 - **🗄️ PostgreSQL:** Base de datos robusta con migraciones automáticas
 - **🔄 CORS:** Configurado para integración con React
+- **☁️ Deploy:** Optimizado para Vercel con fallbacks automáticos
 
 ## 🛠️ Tecnologías
 
@@ -166,6 +202,8 @@ python test_ai.py
 
 ## 🧪 Probar la API
 
+## 🧪 Probar la API
+
 ### Análisis de Texto Directo
 ```bash
 curl -X POST "http://localhost:8000/analyze" \
@@ -186,81 +224,7 @@ curl -X POST "http://localhost:8000/analyze" \
 python test_ai.py
 ```
 
-## 🚀 Despliegue y Desarrollo
-
-### Para Empezar (Nueva Instalación)
-```bash
-# Ejecutar una sola vez para configurar todo
-.\install.bat
-```
-
-### Uso Diario (Desarrollo)
-```bash
-# Activar entorno virtual
-venv\Scripts\activate
-
-# Iniciar servidor
-python main.py
-```
-
-### Producción
-```bash
-# Instalar dependencias completas
-pip install -r requirements.txt
-
-# Configurar variables de entorno
-export DATABASE_URL="postgresql://user:password@host:port/database"
-export ENVIRONMENT="production"
-
-# Aplicar migraciones
-alembic upgrade head
-
-# Iniciar servidor
-uvicorn app.main:app --host 0.0.0.0 --port 8000
-```
-
-## 🔧 Desarrollo
-
-### Instalar Dependencias de Desarrollo
-```bash
-pip install -r requirements.txt
-```
-
-### Crear Nueva Migración
-```bash
-alembic revision --autogenerate -m "Descripción del cambio"
-alembic upgrade head
-```
-
-### Ejecutar Pruebas
-```bash
-# Test completo del sistema de IA
-python test_ai.py
-
-# Verificar salud del sistema
-curl http://localhost:8000/health
-```
-
-## 🐛 Solución de Problemas
-
-### Error de Conexión a PostgreSQL
-1. Verificar que PostgreSQL esté ejecutándose
-2. Revisar credenciales en `.env`
-3. Confirmar que la base de datos `fakenews_db` existe
-
-### Error de Modelo de IA
-- El sistema usa modelos reales de Hugging Face con fallback mock
-- Si hay problemas: `python test_ai.py` para diagnóstico completo
-
-### Puerto ya en uso
-```bash
-# Encontrar proceso en puerto 8000
-netstat -ano | findstr :8000
-# Terminar proceso si es necesario
-taskkill /PID <process_id> /F
-```
-
-## 📝 Características Destacadas
+## 🚀 Características Destacadas
 
 - **✅ Instalación Simplificada:** Un solo comando `install.bat` configura todo
 - **🧪 Testing Integrado:** `test_ai.py` verifica todo el sistema de IA
@@ -268,6 +232,7 @@ taskkill /PID <process_id> /F
 - **⚡ Rendimiento:** Sistema asíncrono optimizado para producción
 - **🔒 Seguridad:** Rate limiting, validación y sanitización integrada
 - **📊 Métricas:** Estadísticas completas y monitoreo del sistema
+- **☁️ Deploy Fácil:** Optimizado para Vercel con configuración automática
 
 ## 🤝 Contribuir
 

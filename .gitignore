@@ -1,21 +1,23 @@
-# === FAKENEWS_DB PROJECT GITIGNORE ===# Python
+# === FAKENEWS_DB PROJECT GITIGNORE ===
 
+# Environment variables and secrets
+.env
+.env.local
+.env.*.local
+.env.production
+*.key
+*.pem
+secrets/
+
+# Python cache and bytecode
 __pycache__/
-
-# Environment variables and secrets*.py[cod]
-
-.env*$py.class
-
-.env.local*.so
-
-.env.*.local.Python
-
-*.keybuild/
-
-*.pemdevelop-eggs/
-
-secrets/dist/
-
+*.py[cod]
+*$py.class
+*.so
+.Python
+build/
+develop-eggs/
+dist/
 downloads/
 
 # Python cache and bytecodeeggs/
