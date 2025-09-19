@@ -1,28 +1,15 @@
 {
   "version": 2,
-  "name": "fakenews-detector-backend",
   "builds": [
     {
       "src": "main.py",
       "use": "@vercel/python"
     }
   ],
-  "regions": ["iad1"],
   "redirects": [
     {
       "source": "/",
-      "destination": "/docs",
-      "permanent": false
+      "destination": "/docs"
     }
-  ],
-  "functions": {
-    "main.py": {
-      "memory": 1024
-    }
-  },
-  "build": {
-    "env": {
-      "PYTHONPATH": "$PYTHONPATH:/vercel/path0"
-    }
-  }
+  ]
 }

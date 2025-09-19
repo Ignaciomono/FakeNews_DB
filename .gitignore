@@ -1,526 +1,236 @@
-# === FAKENEWS_DB PROJECT GITIGNORE ===# === FAKENEWS_DB PROJECT GITIGNORE ===
+# === FAKENEWS_DB PROJECT GITIGNORE ===
+# Optimizado para FastAPI + PostgreSQL + Hugging Face API externa
 
-# Gitignore optimizado para FastAPI + PostgreSQL + Hugging Face API externa
-
-# Environment variables and secrets
-
-# === ENVIRONMENT VARIABLES AND SECRETS ===.env
-
-.env.env.local
-
-.env.local.env.*.local
-
-.env.*.local.env.production
-
-.env.production*.key
-
-*.key*.pem
-
-*.pemsecrets/
-
+# === ENVIRONMENT VARIABLES AND SECRETS ===
+.env
+.env.local
+.env.*.local
+.env.production
+*.key
+*.pem
 secrets/
 
-# Python cache and bytecode
-
-# === PYTHON CACHE AND BYTECODE ===__pycache__/
-
-__pycache__/*.py[cod]
-
-*.py[cod]*$py.class
-
-*$py.class*.so
-
-*.so.Python
-
-.Pythonbuild/
-
-build/develop-eggs/
-
-develop-eggs/dist/
-
-dist/downloads/
-
+# === PYTHON CACHE AND BYTECODE ===
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+.Python
+build/
+develop-eggs/
+dist/
 downloads/
-
-eggs/# Python cache and bytecodeeggs/
-
+eggs/
 .eggs/
-
-lib/__pycache__/.eggs/
-
+lib/
 lib64/
-
-parts/*.py[cod]lib/
-
+parts/
 sdist/
-
-var/*$py.classlib64/
-
+var/
 wheels/
-
-share/python-wheels/*.soparts/
-
+share/python-wheels/
 *.egg-info/
-
-.installed.cfg.Pythonsdist/
-
+.installed.cfg
 *.egg
+MANIFEST
 
-MANIFESTbuild/var/
-
-
-
-# === VIRTUAL ENVIRONMENTS ===develop-eggs/wheels/
-
+# === VIRTUAL ENVIRONMENTS ===
 venv/
-
-env/dist/share/python-wheels/
-
+env/
 ENV/
-
-env.bak/downloads/*.egg-info/
-
+env.bak/
 venv.bak/
+.venv/
 
-.venv/eggs/.installed.cfg
-
-
-
-# === IDES AND EDITORS ===.eggs/*.egg
-
+# === IDES AND EDITORS ===
 .vscode/
-
-.idea/lib/MANIFEST
-
+.idea/
 *.swp
-
-*.swolib64/
-
+*.swo
 *~
-
-.projectparts/# PyInstaller
-
+.project
 .classpath
-
-.settings/sdist/*.manifest
-
+.settings/
 *.sublime-*
 
-var/*.spec
-
 # === OS GENERATED FILES ===
-
-.DS_Storewheels/
-
-.DS_Store?
-
-._*share/python-wheels/# Installer logs
-
-.Spotlight-V100
-
-.Trashes*.egg-info/pip-log.txt
-
-ehthumbs.db
-
-Thumbs.db.installed.cfgpip-delete-this-directory.txt
-
-desktop.ini
-
-*.egg
-
-# === TESTING AND COVERAGE ===
-
-.tox/MANIFEST# Unit test / coverage reports
-
-.nox/
-
-.coveragehtmlcov/
-
-.coverage.*
-
-.cache# Virtual environments.tox/
-
-nosetests.xml
-
-coverage.xmlvenv/.nox/
-
-*.cover
-
-*.py,coverenv/.coverage
-
-.hypothesis/
-
-.pytest_cache/ENV/.coverage.*
-
-htmlcov/
-
-env.bak/.cache
-
-# === DOCUMENTATION ===
-
-docs/_build/venv.bak/nosetests.xml
-
-
-
-# === DATABASE FILES ===.venv/coverage.xml
-
-*.db
-
-*.sqlite.env/*.cover
-
-*.sqlite3
-
-db.sqlite3*.py,cover
-
-database.db
-
-postgresql.log# IDEs and editors.hypothesis/
-
-pg_log/
-
-.vscode/.pytest_cache/
-
-# === LOGS ===
-
-*.log.idea/cover/
-
-logs/
-
-*.swp
-
-# === FASTAPI SPECIFIC ===
-
-.pytest_cache/*.swo# Translations
-
-
-
-# === JUPYTER NOTEBOOK ===*~*.mo
-
-.ipynb_checkpoints
-
-.project*.pot
-
-# === TRANSLATIONS ===
-
-*.mo.classpath
-
-*.pot
-
-.settings/# Django stuff:
-
-# === DJANGO (if mixed project) ===
-
-local_settings.py*.sublime-**.log
-
-db.sqlite3-journal
-
-local_settings.py
-
-# === FLASK (if mixed project) ===
-
-instance/# OS generated filesdb.sqlite3
-
-.webassets-cache
-
-.DS_Storedb.sqlite3-journal
-
-# === SCRAPY ===
-
-.scrapy.DS_Store?
-
-
-
-# === SPHINX DOCUMENTATION ===._*# Flask stuff:
-
-docs/_build/
-
-.Spotlight-V100instance/
-
-# === PYBUILDER ===
-
-.pybuilder/.Trashes.webassets-cache
-
-target/
-
-ehthumbs.db
-
-# === PYENV ===
-
-.python-versionThumbs.db# Scrapy stuff:
-
-
-
-# === PIPENV ===desktop.ini.scrapy
-
-Pipfile.lock
-
-
-
-# === POETRY ===
-
-poetry.lock# FastAPI and web frameworks# Sphinx documentation
-
-
-
-# === PDM ===*.logdocs/_build/
-
-.pdm.toml
-
-logs/
-
-# === PEP 582 ===
-
-__pypackages__/.coverage# PyBuilder
-
-
-
-# === CELERY ===.pytest_cache/.pybuilder/
-
-celerybeat-schedule
-
-celerybeat.pid.tox/target/
-
-
-
-# === AI MODELS AND DATA (No needed for external API) ===.nox/
-
-# models/
-
-# *.model.coverage.*# Jupyter Notebook
-
-# *.pkl
-
-# *.joblibhtmlcov/.ipynb_checkpoints
-
-# *.h5
-
-# *.hdf5.cache
-
-
-
-# === SAGEMATH ===nosetests.xml# IPython
-
-*.sage.py
-
-coverage.xmlprofile_default/
-
-# === DEPLOYMENT ===
-
-.vercel*.coveripython_config.py
-
-
-
-# === PROJECT SPECIFIC ===*.py,cover
-
-# Temporary files
-
-temp/.hypothesis/# pyenv
-
-tmp/
-
-*.tmp.python-version
-
-
-
-# Local backup files# Database files
-
-*.bak
-
-*.backup*.db# pipenv
-
-
-
-# Local development files*.sqlitePipfile.lock
-
-dev/
-
-local/*.sqlite3
-
-
-
-# === HUGGING FACE CACHE (Optional) ===db.sqlite3# poetry
-
-# .cache/huggingface/
-
-database.dbpoetry.lock
-
-# === LARGE FILES (Git LFS should be used) ===
-
-*.zip
-
-*.tar.gz
-
-*.rar# PostgreSQL# pdm
-
-*.sql.pdm.toml
-
-pg_log/
-
-postgresql.log# PEP 582
-
-__pypackages__/
-
-# AI Models and data
-
-models/# Celery stuff
-
-*.modelcelerybeat-schedule
-
-*.pklcelerybeat.pid
-
-*.joblib
-
-*.h5# SageMath parsed files
-
-*.hdf5*.sage.py
-
-*.onnx
-
-*.pb# Environments
-
-data/.env
-
-datasets/.venv
-
-checkpoints/env/
-
-cache/venv/
-
-.cache/ENV/
-
-env.bak/
-
-# Hugging Face cachevenv.bak/
-
-.transformers_cache/
-
-.huggingface/# Spyder project settings
-
-transformers_cache/.spyderproject
-
-.spyproject
-
-# PyTorch cache
-
-.torch/# Rope project settings
-
-torch_cache/.ropeproject
-
-
-
-# Temporary files# mkdocs documentation
-
-temp//site
-
-tmp/
-
-*.tmp# mypy
-
-*.temp.mypy_cache/
-
-.temp/.dmypy.json
-
-dmypy.json
-
-# Test outputs
-
-test_results/# Pyre type checker
-
-test_reports/.pyre/
-
-.pytest_cache/
-
-# pytype static type analyzer
-
-# Documentation builds.pytype/
-
-docs/_build/
-
-site/# Cython debug symbols
-
-cython_debug/
-
-# Package files
-
-*.tar.gz# PyCharm
-
-*.zip.idea/
-
-*.rar
-
-# VS Code
-
-# Jupyter Notebooks.vscode/
-
-.ipynb_checkpoints/*.code-workspace
-
-*.ipynb
-
-# Vim
-
-# Node.js (if using for frontend)*.swp
-
-node_modules/*.swo
-
-npm-debug.log**~
-
-yarn-debug.log*
-
-yarn-error.log*# Emacs
-
-*~
-
-# Backup files\#*\#
-
-*.bak/.emacs.desktop
-
-*.backup/.emacs.desktop.lock
-
-*~*.elc
-
-auto-save-list
-
-# Custom exclusions for this projecttramp
-
-test_outputs/.\#*
-
-performance_logs/
-
-analysis_cache/# OS generated files
-
-backup/.DS_Store
+.DS_Store
 .DS_Store?
 ._*
 .Spotlight-V100
 .Trashes
 ehthumbs.db
 Thumbs.db
+desktop.ini
+
+# === TESTING AND COVERAGE ===
+.tox/
+.nox/
+.coverage
+htmlcov/
+.coverage.*
+.cache
+nosetests.xml
+coverage.xml
+*.cover
+*.py,cover
+.hypothesis/
+.pytest_cache/
+
+# === DOCUMENTATION ===
+docs/_build/
+
+# === DATABASE FILES ===
+*.db
+*.sqlite
+*.sqlite3
+db.sqlite3
+database.db
+postgresql.log
+pg_log/
+
+# === LOGS ===
+*.log
+logs/
+
+# === FASTAPI SPECIFIC ===
+.pytest_cache/
+
+# === JUPYTER NOTEBOOK ===
+.ipynb_checkpoints
+
+# === TRANSLATIONS ===
+*.mo
+*.pot
+
+# === DJANGO (if mixed project) ===
+local_settings.py
+db.sqlite3-journal
+
+# === FLASK (if mixed project) ===
+instance/
+.webassets-cache
+
+# === SCRAPY ===
+.scrapy
+
+# === SPHINX DOCUMENTATION ===
+docs/_build/
+
+# === PYBUILDER ===
+.pybuilder/
+target/
+
+# === PYENV ===
+.python-version
+
+# === PIPENV ===
+Pipfile.lock
+
+# === POETRY ===
+poetry.lock
+
+# === PDM ===
+.pdm.toml
+
+# === PEP 582 ===
+__pypackages__/
+
+# === CELERY ===
+celerybeat-schedule
+celerybeat.pid
+
+# === SAGEMATH ===
+*.sage.py
+
+# === DEPLOYMENT ===
+.vercel
+
+# === PROJECT SPECIFIC ===
+# Temporary files
+temp/
+tmp/
+*.tmp
+
+# Local backup files
+*.bak
+*.backup
+
+# Local development files
+dev/
+local/
+
+# === HUGGING FACE CACHE (Optional) ===
+# .cache/huggingface/
+
+# === LARGE FILES ===
+*.zip
+*.tar.gz
+*.rar
+*.sql
+
+# AI Models and data (commented out for external API)
+# models/
+# *.model
+# *.pkl
+# *.joblib
+# *.h5
+# *.hdf5
+# *.onnx
+# *.pb
+# data/
+# datasets/
+# checkpoints/
+# cache/
+
+# Hugging Face cache
+# .transformers_cache/
+# .huggingface/
+# transformers_cache/
+
+# PyTorch cache
+# .torch/
+# torch_cache/
+
+# Temporary files
+*.temp
+.temp/
+
+# Test outputs
+test_results/
+test_reports/
+
+# Package files
+*.tar.gz
+*.zip
+*.rar
+
+# Node.js (if using for frontend)
+node_modules/
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+
+# Backup files
+\#*\#
+.emacs.desktop
+.emacs.desktop.lock
+*.elc
+auto-save-list
+tramp
+.\#*
+
+# Custom exclusions for this project
+test_outputs/
+performance_logs/
+analysis_cache/
+backup/
 
 # Windows
 *.lnk
 
 # Linux
 *~
-
-# FastAPI specific
-*.db
-*.sqlite
-*.sqlite3
-
-# PostgreSQL
-*.sql.backup
-*.dump
-
-# Alembic
-# Uncomment if you want to ignore all version files
-# alembic/versions/*.py
-
-# Logs
-logs/
-*.log
-npm-debug.log*
-yarn-debug.log*
-yarn-error.log*
 
 # Runtime data
 pids
@@ -534,9 +244,6 @@ coverage/
 
 # nyc test coverage
 .nyc_output
-
-# Dependency directories
-node_modules/
 
 # Optional npm cache directory
 .npm
@@ -554,12 +261,11 @@ node_modules/
 .yarn-integrity
 
 # dotenv environment variables file
-.env.local
 .env.development.local
 .env.test.local
 .env.production.local
 
-# parcel-bundler cache (https://parceljs.org/)
+# parcel-bundler cache
 .cache
 .parcel-cache
 
@@ -574,46 +280,14 @@ dist
 .out
 .storybook-out
 
-# Temporary folders
-tmp/
-temp/
-
-# AI Model files (optional - uncomment if models are large)
-# *.pt
-# *.pth
-# *.pkl
-# *.joblib
-# models/
-# checkpoints/
-
-# Backup files
-*.bak
-*.backup
-*.tmp
-
-# Archive files
-*.zip
-*.tar.gz
-*.rar
-
 # Configuration files with secrets
 config.ini
 settings.ini
 secrets.json
 
 # Certificate files
-*.pem
-*.key
 *.crt
 *.cert
-
-# Media files (if not needed in repo)
-# *.jpg
-# *.jpeg
-# *.png
-# *.gif
-# *.mp4
-# *.avi
 
 # API keys and sensitive data
 .secrets
@@ -629,7 +303,6 @@ credentials.json
 
 # Generated documentation
 docs/build/
-docs/_build/
 
 # Docker
 .dockerignore
@@ -650,15 +323,10 @@ Dockerfile.prod
 .AppleDouble
 .LSOverride
 
-# Thumbnails
-._*
-
 # Files that might appear in the root of a volume
 .DocumentRevisions-V100
 .fseventsd
-.Spotlight-V100
 .TemporaryItems
-.Trashes
 .VolumeIcon.icns
 .com.apple.timemachine.donotpresent
 
@@ -673,5 +341,39 @@ Temporary Items
 uploads/
 downloads/
 cache/
-.cache/
 temp_files/
+
+# Mypy
+.mypy_cache/
+.dmypy.json
+dmypy.json
+
+# Pyre type checker
+.pyre/
+
+# pytype static type analyzer
+.pytype/
+
+# Cython debug symbols
+cython_debug/
+
+# PyCharm
+.idea/
+
+# VS Code
+.vscode/
+*.code-workspace
+
+# Spyder project settings
+.spyderproject
+.spyproject
+
+# Rope project settings
+.ropeproject
+
+# mkdocs documentation
+/site
+
+# Alembic
+# Uncomment if you want to ignore all version files
+# alembic/versions/*.py
