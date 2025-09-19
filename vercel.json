@@ -20,11 +20,6 @@
     "MAX_FILE_SIZE_MB": "10",
     "CORS_ORIGINS": "https://your-frontend-domain.vercel.app,http://localhost:3000"
   },
-  "functions": {
-    "main.py": {
-      "maxDuration": 60
-    }
-  },
   "regions": ["iad1"],
   "installCommand": "pip install -r requirements-vercel.txt",
   "buildCommand": "echo 'Build completed'",
