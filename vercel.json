@@ -7,13 +7,6 @@
       "use": "@vercel/python"
     }
   ],
-  "env": {
-    "ENVIRONMENT": "production",
-    "SECRET_KEY": "@secret_key",
-    "DATABASE_URL": "@database_url",
-    "MAX_FILE_SIZE_MB": "10",
-    "CORS_ORIGINS": "https://your-frontend-domain.vercel.app,http://localhost:3000"
-  },
   "regions": ["iad1"],
   "redirects": [
     {
