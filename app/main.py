@@ -1,13 +1,11 @@
 from fastapi import FastAPI, HTTPException, Request
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import JSONResponse
-from contextlib import asynccontextmanager
 import logging
 import time
 
 # Importar routers
 from app.routers import analysis, metrics, health
-from app.database import create_tables
 from app.services.ai_analyzer import ai_analyzer
 from app.config import settings
 
@@ -17,33 +15,6 @@ logging.basicConfig(
     format="%(asctime)s - %(name)s - %(levelname)s - %(message)s"
 )
 logger = logging.getLogger(__name__)
-
-@asynccontextmanager
-async def lifespan(app: FastAPI):
-    """Gestiona el ciclo de vida de la aplicación"""
-    
-    # Startup
-    logger.info("Iniciando aplicación Fake News Detector...")
-    
-    try:
-        # Crear tablas de base de datos
-        await create_tables()
-        logger.info("✓ Tablas de base de datos creadas/verificadas")
-        
-        # Inicializar modelo de IA
-        await ai_analyzer.initialize()
-        logger.info("✓ Modelo de IA inicializado")
-        
-        logger.info("🚀 Aplicación iniciada exitosamente")
-        
-    except Exception as e:
-        logger.error(f"❌ Error durante el startup: {e}")
-        raise
-    
-    yield
-    
-    # Shutdown
-    logger.info("Cerrando aplicación...")
 
 # Crear aplicación FastAPI
 app = FastAPI(
@@ -74,7 +45,8 @@ app = FastAPI(
     license_info={
         "name": "MIT",
     },
-    lifespan=lifespan
+    docs_url="/docs",
+    redoc_url="/redoc"
 )
 
 # Configurar CORS para React
@@ -85,6 +57,24 @@ app.add_middleware(
     allow_methods=["GET", "POST", "PUT", "DELETE"],
     allow_headers=["*"],
 )
+
+# Evento de startup para inicialización
+@app.on_event("startup")
+async def startup_event():
+    """Inicialización de la aplicación para Vercel"""
+    try:
+        logger.info("🚀 Inicializando Fake News Detector API...")
+        
+        # Inicializar modelo de IA
+        await ai_analyzer.initialize()
+        logger.info("✓ Modelo de IA inicializado")
+        
+        # La base de datos se inicializa automáticamente con las migraciones
+        logger.info("✓ Aplicación lista para recibir requests")
+        
+    except Exception as e:
+        logger.error(f"❌ Error en startup: {e}")
+        # No fallar el startup, usar fallbacks
 
 # Middleware personalizado para logging de requests
 @app.middleware("http")
