@@ -2,8 +2,8 @@
 Punto de entrada principal para la aplicación Fake News Detector - Vercel
 """
 
-# Usar versión mínima para debugging
-from app.main_minimal import app
+# Usar versión mejorada que funciona en Vercel
+from app.main_enhanced import app
 
 # Para desarrollo local
 if __name__ == "__main__":
