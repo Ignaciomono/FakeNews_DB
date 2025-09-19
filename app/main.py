@@ -283,13 +283,16 @@ from fastapi.openapi.utils import get_openapi
 
 @app.get("/docs", include_in_schema=False, response_class=HTMLResponse)
 async def swagger_ui_docs():
-    """Swagger UI completamente manual para Vercel - sin conflictos"""
+    """Swagger UI completamente manual para Vercel - con CDN mejorado"""
     html_content = f"""
     <!DOCTYPE html>
-    <html>
+    <html lang="en">
     <head>
+        <meta charset="UTF-8">
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
         <title>{app.title} - API Documentation</title>
-        <link rel="stylesheet" type="text/css" href="https://unpkg.com/swagger-ui-dist@5.9.0/swagger-ui.css" />
+        <link rel="stylesheet" type="text/css" href="https://cdn.jsdelivr.net/npm/swagger-ui-dist@5.9.0/swagger-ui.css" />
+        <link rel="icon" type="image/png" href="https://cdn.jsdelivr.net/npm/swagger-ui-dist@5.9.0/favicon-32x32.png" sizes="32x32" />
         <style>
             html {{
                 box-sizing: border-box;
@@ -300,20 +303,44 @@ async def swagger_ui_docs():
                 box-sizing: inherit;
             }}
             body {{
-                margin:0;
+                margin: 0;
                 background: #fafafa;
+                font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+            }}
+            .loading {{
+                display: flex;
+                justify-content: center;
+                align-items: center;
+                height: 100vh;
+                font-size: 18px;
+                color: #666;
+            }}
+            .error {{
+                margin: 50px;
+                padding: 20px;
+                background: #fee;
+                border: 1px solid #fcc;
+                border-radius: 5px;
+                color: #c33;
             }}
         </style>
     </head>
     <body>
-        <div id="swagger-ui"></div>
-        <script src="https://unpkg.com/swagger-ui-dist@5.9.0/swagger-ui-bundle.js"></script>
-        <script src="https://unpkg.com/swagger-ui-dist@5.9.0/swagger-ui-standalone-preset.js"></script>
+        <div id="swagger-ui">
+            <div class="loading">
+                🔄 Cargando documentación de la API...
+            </div>
+        </div>
+        
+        <script src="https://cdn.jsdelivr.net/npm/swagger-ui-dist@5.9.0/swagger-ui-bundle.js"></script>
+        <script src="https://cdn.jsdelivr.net/npm/swagger-ui-dist@5.9.0/swagger-ui-standalone-preset.js"></script>
         <script>
-            window.onload = function() {{
+            window.addEventListener('load', function() {{
                 try {{
+                    console.log('Inicializando Swagger UI...');
+                    
                     const ui = SwaggerUIBundle({{
-                        url: './openapi.json',
+                        url: window.location.origin + '/openapi.json',
                         dom_id: '#swagger-ui',
                         deepLinking: true,
                         presets: [
@@ -324,12 +351,45 @@ async def swagger_ui_docs():
                             SwaggerUIBundle.plugins.DownloadUrl
                         ],
                         layout: "StandaloneLayout",
-                        tryItOutEnabled: true
+                        tryItOutEnabled: true,
+                        supportedSubmitMethods: ['get', 'post', 'put', 'delete', 'patch'],
+                        onComplete: function() {{
+                            console.log('✅ Swagger UI cargado correctamente');
+                        }},
+                        onFailure: function(data) {{
+                            console.error('❌ Error en Swagger UI:', data);
+                            showError('Error al cargar la documentación: ' + JSON.stringify(data));
+                        }}
                     }});
+                    
+                    // Timeout de seguridad
+                    setTimeout(function() {{
+                        const content = document.getElementById('swagger-ui').innerHTML;
+                        if (content.includes('Cargando documentación')) {{
+                            showError('Timeout: La documentación está tardando mucho en cargar.');
+                        }}
+                    }}, 10000);
+                    
                 }} catch(e) {{
-                    document.getElementById('swagger-ui').innerHTML = '<h2>Error loading Swagger UI</h2><p>Try <a href="/api-docs">Basic Documentation</a></p>';
+                    console.error('❌ Error fatal:', e);
+                    showError('Error fatal al inicializar Swagger UI: ' + e.message);
                 }}
-            }};
+            }});
+            
+            function showError(message) {{
+                document.getElementById('swagger-ui').innerHTML = `
+                    <div class="error">
+                        <h2>⚠️ Error al cargar documentación</h2>
+                        <p>${{message}}</p>
+                        <p><strong>Alternativas:</strong></p>
+                        <ul>
+                            <li><a href="/api-docs">📋 Documentación básica</a></li>
+                            <li><a href="/redoc">📖 ReDoc (alternativa)</a></li>
+                            <li><a href="/openapi.json">⚙️ Schema OpenAPI directo</a></li>
+                        </ul>
+                    </div>
+                `;
+            }}
         </script>
     </body>
     </html>
