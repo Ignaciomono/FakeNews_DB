@@ -282,14 +282,14 @@ class RapidAPIFakeNewsService:
         
         try:
             headers = {
-                "X-RapidAPI-Key": api_config.RAPIDAPI_KEY,
-                "X-RapidAPI-Host": api_config.RAPIDAPI_HOST,
+                "x-rapidapi-key": api_config.RAPIDAPI_KEY,
+                "x-rapidapi-host": api_config.RAPIDAPI_HOST,
                 "Content-Type": "application/json"
             }
             
             payload = {
-                "text": text,
-                "title": title
+                "key1": "value",
+                "key2": "value"
             }
             
             async with aiohttp.ClientSession() as session:
@@ -304,9 +304,8 @@ class RapidAPIFakeNewsService:
                         return {
                             "success": True,
                             "api": "rapidapi_fake_news",
-                            "is_fake": data.get("is_fake", False),
-                            "confidence": data.get("confidence", 0),
-                            "details": data
+                            "result": data,
+                            "text": text
                         }
                     else:
                         error_text = await response.text()

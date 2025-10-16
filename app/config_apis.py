@@ -25,8 +25,8 @@ class APIConfig:
     
     # Fake News Detection (RapidAPI)
     RAPIDAPI_KEY: Optional[str] = os.getenv("RAPIDAPI_KEY")
-    RAPIDAPI_HOST = "fake-news-detector1.p.rapidapi.com"
-    RAPIDAPI_URL = f"https://{RAPIDAPI_HOST}/api/v1/detect"
+    RAPIDAPI_HOST = "fake-news-detection1.p.rapidapi.com"
+    RAPIDAPI_URL = f"https://{RAPIDAPI_HOST}/text"
     
     # Timeouts y configuración general
     REQUEST_TIMEOUT = 30
