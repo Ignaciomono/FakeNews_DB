@@ -15,18 +15,11 @@ ACCESS_TOKEN_EXPIRE_MINUTES = 30
 
 def verify_password(plain_password: str, hashed_password: str) -> bool:
     """Verifica si una contraseña en texto plano coincide con una hasheada."""
-    return pwd_context.verify(plain_password.encode('utf-8'), hashed_password)
+    return pwd_context.verify(plain_password, hashed_password)
 
 def hash_password(password: str) -> str:
-    """Hashea una contraseña, truncándola si es necesario para bcrypt."""
-    # Convierte la contraseña a bytes
-    password_bytes = password.encode('utf-8')
-    
-    # Bcrypt tiene un límite de 72 bytes. Si es más larga, se trunca.
-    if len(password_bytes) > 72:
-        password_bytes = password_bytes[:72]
-    
-    return pwd_context.hash(password_bytes)
+    """Hashea una contraseña usando bcrypt."""
+    return pwd_context.hash(password)
 
 def create_access_token(data: dict, expires_delta: Optional[timedelta] = None) -> str:
     """Crea un nuevo token de acceso JWT."""
