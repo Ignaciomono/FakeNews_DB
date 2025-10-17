@@ -81,7 +81,7 @@ async def analyze_content(
         score, label, confidence, analysis_time_ms = await ai_analyzer.analyze_text(content)
         
         # Obtener información del modelo
-        model_info = ai_analyzer.get_model_info()
+        model_info = await ai_analyzer.get_model_info()
         
         # Guardar en base de datos
         analysis = NewsAnalysis(

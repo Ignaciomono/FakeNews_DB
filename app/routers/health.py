@@ -43,7 +43,7 @@ async def health_check(db: AsyncSession = Depends(get_db)):
     
     # Verificar modelo de IA
     try:
-        model_info = ai_analyzer.get_model_info()
+        model_info = await ai_analyzer.get_model_info()
         ai_model_ok = model_info.get("is_loaded", False)
         
         # Test básico del modelo si está cargado
@@ -122,7 +122,7 @@ async def database_health(db: AsyncSession = Depends(get_db)):
 async def ai_model_health():
     """Verificación específica del modelo de IA"""
     try:
-        model_info = ai_analyzer.get_model_info()
+        model_info = await ai_analyzer.get_model_info()
         
         # Test del modelo
         test_start = time.time()
