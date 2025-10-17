@@ -1,5 +1,5 @@
 """
-Versión mejorada de la aplicación con endpoints funcionales
+Versión mejorada de la aplicación con endpoints funcionales y APIs externas
 """
 from fastapi import FastAPI, HTTPException, Request
 from fastapi.responses import HTMLResponse, JSONResponse
@@ -7,6 +7,10 @@ from fastapi.middleware.cors import CORSMiddleware
 from pydantic import BaseModel
 import time
 import logging
+
+# Importar router de fact-checking APIs
+from app.routers import fact_check_apis
+from app.config_apis import api_config
 
 # Configurar logging básico
 logging.basicConfig(level=logging.INFO)
@@ -16,15 +20,23 @@ logger = logging.getLogger(__name__)
 app = FastAPI(
     title="Fake News Detector API",
     description="""
-    API para detección de fake news usando inteligencia artificial.
+    API para detección de fake news usando inteligencia artificial y múltiples servicios externos.
     
     ## Características principales
     * Análisis de texto para detectar fake news
+    * Integración con 5 APIs externas de fact-checking
     * Health monitoring del sistema
     * Documentación interactiva
     * API REST completa
+    
+    ## APIs Externas Integradas
+    * **Google Fact Check Tools API** - Verificación de claims
+    * **ClaimBuster API** - Score de verificabilidad
+    * **WordLift Fact-Checking API** - Verificación semántica
+    * **Media Bias/Fact Check (MBFC)** - Análisis de sesgo y credibilidad
+    * **RapidAPI Fake News Detection** - Detección ML de fake news
     """,
-    version="1.0.0",
+    version="2.0.0",
     docs_url="/docs",
     redoc_url="/redoc"
 )
@@ -37,6 +49,9 @@ app.add_middleware(
     allow_methods=["GET", "POST", "PUT", "DELETE"],
     allow_headers=["*"],
 )
+
+# Incluir router de fact-checking APIs
+app.include_router(fact_check_apis.router)
 
 # Modelos de datos
 class AnalyzeRequest(BaseModel):
@@ -55,14 +70,19 @@ async def root():
     """Endpoint raíz con información de la API"""
     return {
         "message": "Fake News Detector API",
-        "version": "1.0.0",
+        "version": "2.0.0",
         "status": "running",
         "timestamp": time.time(),
         "endpoints": {
             "docs": "/docs",
             "health": "/health",
             "analyze": "/analyze",
-            "metrics": "/metrics/summary"
+            "metrics": "/metrics/summary",
+            "fact_check": "/fact-check/status"
+        },
+        "external_apis": {
+            "configured": api_config.get_configured_apis(),
+            "total": len(api_config.get_configured_apis())
         }
     }
 

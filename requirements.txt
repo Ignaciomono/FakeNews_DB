@@ -13,9 +13,10 @@ alembic==1.14.0
 # === MIDDLEWARE Y SEGURIDAD ===
 python-multipart==0.0.17
 
-# === HTTP CLIENT PARA IA EXTERNA ===
+# === HTTP CLIENT PARA IA EXTERNA Y APIs ===
 aiohttp==3.9.1
 httpx==0.25.2
+certifi==2024.8.30
 
 # === PROCESAMIENTO DE CONTENIDO ===
 bleach==6.2.0
