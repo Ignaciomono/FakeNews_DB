@@ -13,9 +13,16 @@ SessionLocal = sessionmaker(autocommit=False, autoflush=False, bind=engine)
 
 # Configuración asíncrona para FastAPI
 ASYNC_DATABASE_URL = settings.DATABASE_URL.replace("postgresql://", "postgresql+asyncpg://")
-async_engine = create_async_engine(ASYNC_DATABASE_URL)
+async_engine = create_async_engine(
+    ASYNC_DATABASE_URL,
+    pool_size=5,
+    max_overflow=10,
+    pool_pre_ping=True,
+    pool_recycle=300,
+    echo=False
+)
 AsyncSessionLocal = sessionmaker(
-    async_engine, class_=AsyncSession, expire_on_commit=False
+    async_engine, class_=AsyncSession, expire_on_commit=False, autoflush=False
 )
 
 Base = declarative_base()
