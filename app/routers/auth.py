@@ -39,8 +39,15 @@ async def login(form_data: OAuth2PasswordRequestForm = Depends(), db: AsyncSessi
     result = await db.execute(select(User).filter(User.email == form_data.username))
     user = result.scalar_one_or_none()
     
-    # Llama a la función de verificación del otro archivo
-    if not user or not verify_password(form_data.password, user.hashed_password):
+    # Verifica primero si el usuario existe, luego valida la contraseña
+    if not user:
+        raise HTTPException(
+            status_code=status.HTTP_401_UNAUTHORIZED, 
+            detail="Incorrect email or password",
+            headers={"WWW-Authenticate": "Bearer"},
+        )
+    
+    if not verify_password(form_data.password, user.hashed_password):
         raise HTTPException(
             status_code=status.HTTP_401_UNAUTHORIZED, 
             detail="Incorrect email or password",
