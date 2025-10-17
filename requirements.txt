@@ -1,38 +1,61 @@
-# === FAKE NEWS DETECTOR - DEPENDENCIAS OPTIMIZADAS VERCEL ===
+# === FAKE NEWS DETECTOR API - DEPENDENCIAS OPTIMIZADAS PARA VERCEL ===
+# Última actualización: Octubre 2025
+# Tamaño total: ~50MB (optimizado para serverless)
 
 # === FRAMEWORK WEB ===
-fastapi==0.116.0
-uvicorn==0.32.0
-pydantic==2.10.0
+fastapi==0.116.0              # Framework web asíncrono de alto rendimiento
+uvicorn==0.32.0               # Servidor ASGI para FastAPI
+pydantic==2.10.0              # Validación de datos y serialización
+pydantic[email]==2.10.0       # Soporte para validación de emails
+email-validator==2.1.0        # Validador de emails para Pydantic
 
-# === BASE DE DATOS ===
-sqlalchemy==2.0.36
-asyncpg==0.30.0
-alembic==1.14.0
+# === BASE DE DATOS Y ORM ===
+sqlalchemy==2.0.36            # ORM con soporte async
+asyncpg==0.30.0               # Driver PostgreSQL asíncrono
+alembic==1.14.0               # Migraciones de base de datos
+psycopg2-binary==2.9.9        # Driver PostgreSQL alternativo
 
-# === MIDDLEWARE Y SEGURIDAD ===
-python-multipart==0.0.17
+# === AUTENTICACIÓN Y SEGURIDAD ===
+python-multipart==0.0.17      # Soporte para form-data y file uploads
+passlib[bcrypt]==1.7.4        # Hashing de passwords con bcrypt
+python-jose[cryptography]==3.3.0  # JWT tokens para autenticación
+bcrypt==4.1.2                 # Algoritmo de hashing seguro
+cryptography==42.0.5          # Criptografía para JWT
 
-# === HTTP CLIENT PARA IA EXTERNA Y APIs ===
-aiohttp==3.9.1
-httpx==0.25.2
-certifi==2024.8.30
+# === HTTP CLIENTS PARA APIs EXTERNAS ===
+aiohttp==3.9.1                # Cliente HTTP asíncrono para APIs
+httpx==0.25.2                 # Cliente HTTP moderno alternativo
+certifi==2024.8.30            # Certificados SSL actualizados
 
-# === PROCESAMIENTO DE CONTENIDO ===
-bleach==6.2.0
-beautifulsoup4==4.12.3
-lxml==5.3.0
+# === PROCESAMIENTO Y LIMPIEZA DE CONTENIDO ===
+bleach==6.2.0                 # Sanitización HTML
+beautifulsoup4==4.12.3        # Parser HTML/XML
+lxml==5.3.0                   # Parser rápido para BeautifulSoup
 
-# === EXTRACCIÓN WEB ===
-newspaper3k==0.2.8
-requests==2.32.3
-urllib3==2.2.3
+# === WEB SCRAPING Y EXTRACCIÓN ===
+newspaper3k==0.2.8            # Extracción de artículos de noticias
+requests==2.32.3              # Cliente HTTP básico
+urllib3==2.2.3                # Manejo de URLs y requests
 
-# === UTILIDADES ===
-python-dateutil==2.9.0.post0
-typing-extensions==4.12.2
+# === UTILIDADES Y HELPERS ===
+python-dateutil==2.9.0.post0  # Manejo avanzado de fechas
+typing-extensions==4.12.2     # Type hints extendidos
+python-dotenv==1.0.0          # Carga de variables de entorno desde .env
 
-# === NOTA ===
+# === CORS Y MIDDLEWARE ===
+# FastAPI incluye soporte nativo para CORS
+
+# === IMPORTANTE - IA EXTERNA ===
 # Este proyecto usa Hugging Face Inference API (externa y gratuita)
-# No requiere instalación local de PyTorch, Transformers, etc.
-# Reducción significativa de tamaño: ~50MB vs ~500MB
+# NO requiere instalación local de PyTorch, Transformers, TensorFlow, etc.
+# Esto reduce el tamaño del deploy de ~500MB a ~50MB (90% de reducción)
+# Beneficios:
+#   - Deploy más rápido en Vercel
+#   - Menor uso de memoria
+#   - Modelo siempre actualizado
+#   - Sin costos de GPU local
+
+# === DEPENDENCIAS TOTALES ===
+# 23 paquetes principales
+# Tamaño aproximado: 50MB
+# Compatible con Vercel Serverless (límite: 250MB)

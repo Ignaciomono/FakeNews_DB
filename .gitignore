@@ -131,10 +131,30 @@ dmypy.json
 
 # === DEVELOPMENT ONLY FILES ===
 test_local.py
+test_ai.py
+test_external_apis.py
+test_routes.py
 debug.py
 playground/
 experiments/
 drafts/
+install.bat
+docker-compose.yml
+
+# === BACKUP AND OLD FILES ===
+*.backup
+*.old
+*_old.*
+*_backup.*
+main.py.backup
+README.old.md
+CLEANUP_REPORT.md
+NEON_SETUP.md
+EXTERNAL_APIS.md
+
+# === DUPLICATE FILES ===
+app/main.py
+app/_main_*.py
 
 # === MEDIA AND UPLOADS ===
 uploads/
@@ -148,6 +168,11 @@ static/uploads/
 *api_key*
 *credentials*
 .project
+
+# === ALEMBIC ===
+# Mantener estructura pero ignorar backups
+alembic/versions/*.pyc
+alembic/versions/__pycache__/
 .classpath
 .settings/
 *.sublime-*
