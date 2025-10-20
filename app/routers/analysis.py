@@ -24,9 +24,9 @@ async def analyze_content(
     request: Request,
     db: AsyncSession = Depends(get_db),
     # Parámetros opcionales para diferentes tipos de análisis
-    text: Optional[str] = Form(None),
-    url: Optional[str] = Form(None),
-    file: Optional[UploadFile] = File(None)
+    text: Optional[str] = Form(default=None),
+    url: Optional[str] = Form(default=None),
+    file: Optional[UploadFile] = File(default=None)
 ):
     """
     Analiza contenido de diferentes fuentes para detectar fake news.
@@ -39,12 +39,25 @@ async def analyze_content(
     Acepta tanto Form-data como JSON.
     """
     
+    # Normalizar valores vacíos a None
+    if text is not None and (text.strip() == "" or text.strip().lower() == "string"):
+        text = None
+    if url is not None and (url.strip() == "" or url.strip().lower() == "string"):
+        url = None
+    if file is not None and (not hasattr(file, 'filename') or not file.filename):
+        file = None
+    
     # Si no se recibieron parámetros de Form, intentar leer JSON del body
     if not any([text, url, file]):
         try:
             body = await request.json()
             text = body.get("text")
             url = body.get("url")
+            # Normalizar de nuevo después de leer JSON
+            if text and text.strip() == "":
+                text = None
+            if url and url.strip() == "":
+                url = None
         except:
             pass
     
