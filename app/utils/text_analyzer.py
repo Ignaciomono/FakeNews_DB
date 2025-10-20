@@ -18,7 +18,6 @@ class TextFeatures:
     sensational_words: int  # Palabras sensacionalistas
     clickbait_patterns: int  # Patrones de clickbait
     unverifiable_claims: int  # Afirmaciones no verificables
-    extraordinary_claims: int = 0  # Afirmaciones extraordinarias (unicornios, aliens, etc.)
     
     # Características de credibilidad
     has_sources: bool  # Menciona fuentes
@@ -27,6 +26,9 @@ class TextFeatures:
     
     # Score final de características (0-1, donde 0 es más probable fake)
     feature_score: float
+    
+    # Campos opcionales (con defaults al final)
+    extraordinary_claims: int = 0  # Afirmaciones extraordinarias (unicornios, aliens, etc.)
 
 
 class TextAnalyzer:
