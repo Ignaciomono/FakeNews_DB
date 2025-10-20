@@ -9,7 +9,7 @@ import logging
 import time
 
 # Importar routers
-from app.routers import analysis, metrics, health, auth, fact_check_apis
+from app.routers import analysis, metrics, health, auth, fact_check_apis, models
 from app.services.ai_analyzer import ai_analyzer
 from app.config import settings
 
@@ -91,6 +91,7 @@ app.include_router(auth.router)
 app.include_router(analysis.router)
 app.include_router(fact_check_apis.router)
 app.include_router(metrics.router)
+app.include_router(models.router)
 
 # Endpoint raíz
 @app.get("/", tags=["Root"])
@@ -103,6 +104,7 @@ async def root():
         "documentation": "/docs",
         "features": {
             "ai_analysis": True,
+            "fake_news_models": 6,
             "fact_checking_apis": 5,
             "authentication": True,
             "database": "Neon PostgreSQL",
@@ -112,6 +114,7 @@ async def root():
             "docs": "/docs",
             "health": "/health",
             "analyze": "/analyze",
+            "models": "/models (list all AI models)",
             "auth": "/auth/register & /auth/login",
             "fact_check": "/fact-check/status",
             "metrics": "/metrics/summary"

@@ -20,8 +20,20 @@ class Settings:
     
     # AI External API settings (Hugging Face Inference API - Free)
     HF_API_URL: str = os.getenv("HF_API_URL", "https://api-inference.huggingface.co/models/")
+    
+    # Modelos especializados en detección de Fake News
+    # Modelo principal (cambiar según necesidad)
     HF_MODEL_NAME: str = os.getenv("HF_MODEL_NAME", "hamzab/roberta-fake-news-classification")
-    HF_FALLBACK_MODEL: str = "cardiffnlp/twitter-roberta-base-sentiment-latest"  # Modelo de respaldo
+    
+    # Modelos alternativos de Fake News disponibles:
+    # 1. "hamzab/roberta-fake-news-classification" - RoBERTa fine-tuned para fake news
+    # 2. "jy46604790/Fake-News-Bert-Detect" - BERT especializado en fake news
+    # 3. "mrm8488/bert-mini-finetuned-fake-news-detection" - BERT mini optimizado
+    # 4. "GonzaloA/fake-news-detection-spanish" - Especializado en español
+    # 5. "elozano/bert-base-cased-fake-news" - BERT base para fake news
+    # 6. "Narrativa/beto-fake-news-detection" - BETO (español) para fake news
+    
+    HF_FALLBACK_MODEL: str = "jy46604790/Fake-News-Bert-Detect"  # Modelo de respaldo
     HF_API_TOKEN: str = os.getenv("HF_API_TOKEN", "")  # Token opcional (rate limits más altos)
     
     # Content extraction settings
