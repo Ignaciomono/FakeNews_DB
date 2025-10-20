@@ -11,9 +11,10 @@ from app.schemas.news import (
     SourceType, AnalysisLabel
 )
 from app.models.news import NewsAnalysis, AnalysisMetric
-from app.services.ai_analyzer import ai_analyzer
+from app.services.ai_analyzer import ai_analyzer, FakeNewsLabel
 from app.utils.content_extractor import content_extractor
 from app.utils.security import security_utils, rate_limiter
+from app.utils.text_analyzer import text_analyzer
 
 logger = logging.getLogger(__name__)
 
@@ -101,20 +102,45 @@ async def analyze_content(
                 detail="No se pudo extraer contenido suficiente para análisis"
             )
         
-        # Ejecutar análisis de IA
+        # 1. Ejecutar análisis de IA
         score, label, confidence, analysis_time_ms = await ai_analyzer.analyze_text(content)
+        
+        # 2. Análisis de características del texto
+        features = text_analyzer.analyze(content)
+        combined_score, feature_explanation = text_analyzer.get_recommendation(features, score)
+        
+        # 3. Generar warnings basados en características
+        warnings = []
+        if features.sensational_words > 3:
+            warnings.append(f"Detectadas {features.sensational_words} palabras sensacionalistas")
+        if features.clickbait_patterns > 0:
+            warnings.append(f"Detectados {features.clickbait_patterns} patrones de clickbait")
+        if features.caps_ratio > 0.3:
+            warnings.append("Uso excesivo de MAYÚSCULAS")
+        if features.exclamation_ratio > 2:
+            warnings.append("Uso excesivo de signos de exclamación")
+        if features.unverifiable_claims > 1:
+            warnings.append(f"Detectadas {features.unverifiable_claims} afirmaciones no verificables")
+        
+        # 4. Ajustar label basado en score combinado
+        if combined_score < 0.35:
+            final_label = FakeNewsLabel.FAKE
+        elif combined_score > 0.65:
+            final_label = FakeNewsLabel.REAL
+        else:
+            final_label = FakeNewsLabel.UNCERTAIN
         
         # Obtener información del modelo
         model_info = await ai_analyzer.get_model_info()
         
-        # Guardar en base de datos
+        # Guardar en base de datos (usando score combinado)
         analysis = NewsAnalysis(
             content=content,
             source_type=source_type.value,
             source_url=source_url,
             file_name=file_name,
-            score=score,
-            label=label.value,
+            score=combined_score,  # Usar score combinado
+            label=final_label.value,  # Usar label ajustado
             confidence=confidence,
             model_version=model_info.get("model_name", "unknown"),
             analysis_time_ms=analysis_time_ms,
@@ -136,17 +162,30 @@ async def analyze_content(
         db.add(metrics)
         await db.commit()
         
-        logger.info(f"Análisis completado - ID: {analysis.id}, Label: {label.value}, Score: {score:.3f}")
+        logger.info(f"Análisis completado - ID: {analysis.id}, Label: {final_label.value}, Combined Score: {combined_score:.3f}, AI Score: {score:.3f}")
         
         return AnalysisResult(
             id=analysis.id,
-            score=score,
-            label=label,
+            score=combined_score,  # Score combinado
+            label=final_label,  # Label ajustado
             confidence=confidence,
             model_version=model_info.get("model_name", "unknown"),
             analysis_time_ms=analysis_time_ms,
             content_length=len(content),
             source_type=source_type,
+            combined_score=combined_score,
+            feature_analysis={
+                "ai_score": score,
+                "feature_score": features.feature_score,
+                "explanation": feature_explanation,
+                "sensational_words": features.sensational_words,
+                "clickbait_patterns": features.clickbait_patterns,
+                "caps_ratio": round(features.caps_ratio, 2),
+                "exclamation_ratio": round(features.exclamation_ratio, 2),
+                "has_sources": features.has_sources,
+                "has_dates": features.has_dates
+            },
+            warnings=warnings if warnings else None,
             created_at=analysis.created_at
         )
         
