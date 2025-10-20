@@ -112,7 +112,7 @@ class AIAnalyzer:
         }
     
     async def cleanup(self):
-        if self.session:
-            await self.session.close()
+        # No hay sesión persistente para limpiar
+        pass
 
 ai_analyzer = AIAnalyzer()
