@@ -73,19 +73,22 @@ class AIAnalyzer:
             label_str = best.get('label', '').upper()
             confidence = best.get('score', 0.5)
             
-            # Mapeo de score (0.0 a 1.0) donde 0 es FAKE y 1 es REAL
-            if "NEGATIVE" in label_str or "FAKE" in label_str:
-                score = 1.0 - confidence
+            # Mapeo mejorado para diferentes modelos
+            # Modelos de fake news: LABEL_0 = FAKE, LABEL_1 = REAL (o viceversa)
+            # Modelos de sentiment: NEGATIVE, NEUTRAL, POSITIVE
+            if "FAKE" in label_str or "LABEL_0" in label_str or "NEGATIVE" in label_str or "FALSE" in label_str:
+                score = 1.0 - confidence  # Score bajo indica fake
                 label = FakeNewsLabel.FAKE
-            elif "POSITIVE" in label_str or "REAL" in label_str:
-                score = confidence
+            elif "REAL" in label_str or "LABEL_1" in label_str or "POSITIVE" in label_str or "TRUE" in label_str:
+                score = confidence  # Score alto indica real
                 label = FakeNewsLabel.REAL
             else: # Neutral, Uncertain, etc.
                 score = 0.5
                 label = FakeNewsLabel.UNCERTAIN
 
             return score, label, confidence
-        except Exception:
+        except Exception as e:
+            logger.error(f"Error procesando resultado del modelo: {e}")
             return (0.5, FakeNewsLabel.UNCERTAIN, 0.5)
     
     def _fallback_analysis(self, text: str) -> Tuple[float, FakeNewsLabel, float]:

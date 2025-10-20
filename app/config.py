@@ -20,8 +20,8 @@ class Settings:
     
     # AI External API settings (Hugging Face Inference API - Free)
     HF_API_URL: str = os.getenv("HF_API_URL", "https://api-inference.huggingface.co/models/")
-    HF_MODEL_NAME: str = os.getenv("HF_MODEL_NAME", "cardiffnlp/twitter-roberta-base-sentiment-latest")
-    HF_FALLBACK_MODEL: str = "microsoft/DialoGPT-medium"  # Modelo de respaldo
+    HF_MODEL_NAME: str = os.getenv("HF_MODEL_NAME", "hamzab/roberta-fake-news-classification")
+    HF_FALLBACK_MODEL: str = "cardiffnlp/twitter-roberta-base-sentiment-latest"  # Modelo de respaldo
     HF_API_TOKEN: str = os.getenv("HF_API_TOKEN", "")  # Token opcional (rate limits más altos)
     
     # Content extraction settings
