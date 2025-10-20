@@ -16,8 +16,7 @@ class FakeNewsLabel(Enum):
 
 class AIAnalyzer:
     def __init__(self):
-        self.session = None
-        self.is_loaded = False
+        self.is_loaded = True  # Siempre disponible
         self.model_name = settings.HF_MODEL_NAME
         self.api_url = f"{settings.HF_API_URL}{self.model_name}"
         
@@ -26,21 +25,13 @@ class AIAnalyzer:
             self.headers["Authorization"] = f"Bearer {settings.HF_API_TOKEN}"
     
     async def initialize(self):
-        try:
-            timeout = aiohttp.ClientTimeout(total=30, connect=10)
-            self.session = aiohttp.ClientSession(timeout=timeout, headers=self.headers)
-            self.is_loaded = True
-        except Exception as e:
-            logger.warning(f"Error: {e}")
-            self.is_loaded = True
+        """Mantenido para compatibilidad, pero ya no necesario"""
+        self.is_loaded = True
     
     async def analyze_text(self, text: str) -> Tuple[float, FakeNewsLabel, float, int]:
-        start_time = time.time() # <-- 2. Registrar el tiempo de inicio
+        start_time = time.time()
 
         try:
-            if not self.session:
-                await self.initialize()
-            
             cleaned_text = text.strip()[:500] if text else "empty"
             api_result = await self._call_api(cleaned_text)
             
@@ -60,12 +51,15 @@ class AIAnalyzer:
     async def _call_api(self, text: str) -> Optional[List[Dict[str, Any]]]:
         try:
             payload = {"inputs": text}
-            async with self.session.post(self.api_url, json=payload) as response:
-                if response.status == 200:
-                    data = await response.json()
-                    # La API de HF puede devolver un dict en lugar de una lista de dicts
-                    return data if isinstance(data, list) else [data]
-                return None
+            timeout = aiohttp.ClientTimeout(total=30, connect=10)
+            # Crear sesión nueva para cada llamada (compatibilidad serverless)
+            async with aiohttp.ClientSession(timeout=timeout, headers=self.headers) as session:
+                async with session.post(self.api_url, json=payload) as response:
+                    if response.status == 200:
+                        data = await response.json()
+                        # La API de HF puede devolver un dict en lugar de una lista de dicts
+                        return data if isinstance(data, list) else [data]
+                    return None
         except Exception:
             return None
     
