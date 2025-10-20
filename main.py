@@ -102,6 +102,7 @@ async def root():
         "version": "2.0.0",
         "status": "running",
         "documentation": "/docs",
+        "current_model": settings.HF_MODEL_NAME,  # Mostrar modelo actual
         "features": {
             "ai_analysis": True,
             "fake_news_models": 6,
