@@ -18,6 +18,7 @@ class TextFeatures:
     sensational_words: int  # Palabras sensacionalistas
     clickbait_patterns: int  # Patrones de clickbait
     unverifiable_claims: int  # Afirmaciones no verificables
+    extraordinary_claims: int = 0  # Afirmaciones extraordinarias (unicornios, aliens, etc.)
     
     # Características de credibilidad
     has_sources: bool  # Menciona fuentes
@@ -64,7 +65,17 @@ class TextAnalyzer:
     UNVERIFIABLE_WORDS = [
         'dicen que', 'se rumorea', 'según fuentes', 'algunos expertos',
         'se dice que', 'supuestamente', 'aparentemente', 'parece que',
+        'se inventa', 'inventado', 'falso', 'mentira', 'engaño',
         'sources say', 'allegedly', 'reportedly', 'apparently', 'supposedly'
+    ]
+    
+    # Palabras que indican eventos extraordinarios que requieren verificación
+    EXTRAORDINARY_CLAIMS = [
+        'unicornio', 'unicornios', 'alien', 'aliens', 'ovni', 'ovnis',
+        'extraterrestre', 'extraterrestres', 'milagro', 'milagros',
+        'sobrenatural', 'paranormal', 'fantasma', 'fantasmas',
+        'monstruo', 'monstruos', 'criatura', 'criaturas',
+        'unicorn', 'unicorns', 'ufo', 'alien', 'ghost', 'monster'
     ]
     
     # Palabras que indican credibilidad
@@ -102,6 +113,12 @@ class TextAnalyzer:
             if phrase in text_lower
         )
         
+        # Nueva característica: afirmaciones extraordinarias
+        extraordinary_claims = sum(
+            1 for word in self.EXTRAORDINARY_CLAIMS
+            if word in text_lower
+        )
+        
         # Características de credibilidad
         has_sources = any(word in text_lower for word in self.SOURCE_INDICATORS)
         has_dates = bool(re.search(r'\b(19|20)\d{2}\b', text))  # Años 1900-2099
@@ -111,7 +128,7 @@ class TextAnalyzer:
         feature_score = self._calculate_feature_score(
             exclamation_ratio, caps_ratio, question_ratio,
             sensational_words, clickbait_patterns, unverifiable_claims,
-            has_sources, has_dates, has_numbers
+            has_sources, has_dates, has_numbers, extraordinary_claims
         )
         
         return TextFeatures(
@@ -121,6 +138,7 @@ class TextAnalyzer:
             sensational_words=sensational_words,
             clickbait_patterns=clickbait_patterns,
             unverifiable_claims=unverifiable_claims,
+            extraordinary_claims=extraordinary_claims,
             has_sources=has_sources,
             has_dates=has_dates,
             has_numbers=has_numbers,
@@ -137,7 +155,8 @@ class TextAnalyzer:
         unverifiable_claims: int,
         has_sources: bool,
         has_dates: bool,
-        has_numbers: bool
+        has_numbers: bool,
+        extraordinary_claims: int = 0
     ) -> float:
         """
         Calcula un score basado en características (0-1)
@@ -154,9 +173,13 @@ class TextAnalyzer:
         score -= min(clickbait_patterns * 0.15, 0.3)  # Patrones de clickbait
         score -= min(unverifiable_claims * 0.08, 0.2)  # Afirmaciones no verificables
         
+        # NUEVA REGLA: Penalizar fuertemente afirmaciones extraordinarias sin fuentes
+        if extraordinary_claims > 0 and not has_sources:
+            score -= min(extraordinary_claims * 0.25, 0.5)  # Penalización fuerte
+        
         # Recompensar características positivas
         if has_sources:
-            score += 0.1
+            score += 0.15  # Aumentado de 0.1
         if has_dates:
             score += 0.05
         if has_numbers:
@@ -174,6 +197,7 @@ class TextAnalyzer:
             sensational_words=0,
             clickbait_patterns=0,
             unverifiable_claims=0,
+            extraordinary_claims=0,
             has_sources=False,
             has_dates=False,
             has_numbers=False,

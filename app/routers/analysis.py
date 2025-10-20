@@ -121,6 +121,8 @@ async def analyze_content(
             warnings.append("Uso excesivo de signos de exclamación")
         if features.unverifiable_claims > 1:
             warnings.append(f"Detectadas {features.unverifiable_claims} afirmaciones no verificables")
+        if features.extraordinary_claims > 0 and not features.has_sources:
+            warnings.append(f"⚠️ CRÍTICO: Afirmaciones extraordinarias sin fuentes verificables detectadas")
         
         # 4. Ajustar label basado en score combinado
         if combined_score < 0.35:
