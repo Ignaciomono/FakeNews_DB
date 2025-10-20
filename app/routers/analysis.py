@@ -1,7 +1,7 @@
 from fastapi import APIRouter, Depends, HTTPException, UploadFile, File, Form, Request
 from fastapi.responses import JSONResponse
 from sqlalchemy.ext.asyncio import AsyncSession
-from typing import Optional
+from typing import Optional, Union
 import time
 import logging
 
@@ -26,7 +26,7 @@ async def analyze_content(
     # Parámetros opcionales para diferentes tipos de análisis
     text: Optional[str] = Form(default=None),
     url: Optional[str] = Form(default=None),
-    file: Optional[UploadFile] = File(default=None)
+    file: Union[UploadFile, str, None] = File(default=None)
 ):
     """
     Analiza contenido de diferentes fuentes para detectar fake news.
