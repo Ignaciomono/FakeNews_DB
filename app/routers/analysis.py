@@ -35,7 +35,18 @@ async def analyze_content(
     - text: Texto directo para analizar
     - url: URL de un artículo de noticias
     - file: Archivo de texto (.txt, .docx, .pdf)
+    
+    Acepta tanto Form-data como JSON.
     """
+    
+    # Si no se recibieron parámetros de Form, intentar leer JSON del body
+    if not any([text, url, file]):
+        try:
+            body = await request.json()
+            text = body.get("text")
+            url = body.get("url")
+        except:
+            pass
     
     # Rate limiting
     client_ip = request.client.host
@@ -129,11 +140,17 @@ async def analyze_content(
     except HTTPException:
         raise
     except Exception as e:
-        logger.error(f"Error en análisis: {e}")
+        logger.error(f"Error en análisis: {type(e).__name__}: {str(e)}", exc_info=True)
         await db.rollback()
+        
+        # Devolver error más descriptivo
+        error_detail = f"Error interno del servidor: {type(e).__name__}"
+        if str(e):
+            error_detail += f" - {str(e)}"
+        
         raise HTTPException(
             status_code=500,
-            detail="Error interno del servidor durante el análisis"
+            detail=error_detail
         )
 
 @router.get("/{analysis_id}", response_model=DetailedAnalysisResult)
