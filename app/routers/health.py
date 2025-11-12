@@ -22,6 +22,16 @@ router = APIRouter(prefix="/health", tags=["health"])
 # Variable global para trackear el tiempo de inicio
 start_time = time.time()
 
+@router.get("/ping")
+async def ping():
+    """Health check simple sin dependencias - para serverless"""
+    return {
+        "status": "healthy",
+        "message": "Service is running",
+        "timestamp": datetime.now(),
+        "uptime_seconds": int(time.time() - start_time)
+    }
+
 @router.get("/", response_model=HealthResponse)
 async def health_check(db: AsyncSession = Depends(get_db)):
     """
