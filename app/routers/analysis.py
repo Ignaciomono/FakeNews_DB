@@ -12,6 +12,9 @@ from app.schemas.news import (
 )
 from app.models.news import NewsAnalysis, AnalysisMetric
 from app.services.ai_analyzer import ai_analyzer
+from app.services.entity_verifier import entity_verifier
+from app.services.external_apis import ExternalAPIsService
+from app.services.news_api_service import news_api_service
 from app.utils.content_extractor import content_extractor
 from app.utils.security import security_utils, rate_limiter
 
@@ -77,8 +80,149 @@ async def analyze_content(
                 detail="No se pudo extraer contenido suficiente para análisis"
             )
         
-        # Ejecutar análisis de IA
+        # PASO 1: Verificación con NER (entidades conocidas) + Wikipedia API - PRIORIDAD ALTA
+        ner_result = await entity_verifier.verify_claim(content)
+        
+        # PASO 2: Google Fact Check API (verificación externa) - PRIORIDAD MEDIA
+        fact_check_result = None
+        try:
+            external_api_service = ExternalAPIsService()
+            fact_check_result = await external_api_service.check_with_google_factcheck(content[:500])  # Límite de 500 chars
+            if fact_check_result and fact_check_result.get("claims"):
+                logger.info(f"Google Fact Check encontró {len(fact_check_result['claims'])} resultados")
+        except Exception as e:
+            logger.warning(f"Error en Google Fact Check: {e}")
+        
+        # PASO 3: NewsAPI - Buscar noticias recientes (para claims políticos/actuales)
+        news_result = None
+        try:
+            # Extraer personas del NER para búsqueda más precisa
+            person_name = None
+            if ner_result and ner_result.get("entities", {}).get("persons"):
+                person_name = ner_result["entities"]["persons"][0]
+            
+            news_result = await news_api_service.verify_political_claim(content[:100], person_name)
+            if news_result and news_result.get("found_articles"):
+                logger.info(f"📰 NewsAPI encontró {news_result.get('total_results', 0)} artículos")
+        except Exception as e:
+            logger.warning(f"Error en NewsAPI: {e}")
+        
+        # PASO 4: Análisis con modelos de IA (sentimiento/patrones) - FALLBACK
         score, label, confidence, analysis_time_ms = await ai_analyzer.analyze_text(content)
+        
+        # PASO 5: Combinar resultados NER + Fact Check + NewsAPI + AI
+        final_score = score
+        final_label = label
+        final_confidence = confidence
+        verification_method = "AI_MODELS"
+        verification_sources = []
+        
+        # Prioridad 1: NER tiene un veredicto claro
+        if ner_result and ner_result.get("overall_verdict") is not None:
+            verification_method = "NER_ENTITIES"
+            verification_sources.append("entity_verification")
+            
+            if ner_result["overall_verdict"] == "fake":
+                final_score = 0.0 + (ner_result["confidence"] * 0.1)  # 0.0 - 0.1 range
+                final_label = AnalysisLabel.FAKE
+                final_confidence = ner_result["confidence"]
+                logger.info(f"✅ NER detectó FAKE: {ner_result.get('explanation', 'Sin explicación')}")
+                
+            elif ner_result["overall_verdict"] == "real":
+                final_score = 0.9 + (ner_result["confidence"] * 0.1)  # 0.9 - 1.0 range
+                final_label = AnalysisLabel.REAL
+                final_confidence = ner_result["confidence"]
+                logger.info(f"✅ NER detectó REAL: {ner_result.get('explanation', 'Sin explicación')}")
+            
+            elif ner_result["overall_verdict"] == "needs_verification":
+                # Claim político controversial sin fuente - requiere verificación externa
+                verification_method = "POLITICAL_CLAIM_UNVERIFIED"
+                verification_sources.append("political_detector")
+                
+                # Intentar verificar con NewsAPI o Fact Check
+                if news_result and news_result.get("found_articles") and news_result.get("relevant_articles", 0) > 0:
+                    # NewsAPI encontró artículos relevantes
+                    verdict = news_result.get("verdict", "uncertain")
+                    if verdict == "likely_true":
+                        final_score = 0.70
+                        final_label = AnalysisLabel.REAL
+                        final_confidence = 0.75
+                        verification_method = "POLITICAL_CLAIM_NEWS"
+                        verification_sources.append("newsapi")
+                    elif verdict == "possibly_true":
+                        final_score = 0.55
+                        final_label = AnalysisLabel.UNCERTAIN
+                        final_confidence = 0.60
+                        verification_method = "POLITICAL_CLAIM_NEWS"
+                        verification_sources.append("newsapi")
+                    else:
+                        final_score = 0.50
+                        final_label = AnalysisLabel.UNCERTAIN
+                        final_confidence = 0.55
+                else:
+                    # Sin verificación externa - marcar como UNCERTAIN con baja confianza
+                    final_score = 0.50
+                    final_label = AnalysisLabel.UNCERTAIN
+                    final_confidence = 0.50
+                    logger.info(f"⚠️ Claim político sin verificar: {ner_result.get('explanation', 'Sin fuente')}")
+        
+        # Prioridad 2: Google Fact Check tiene resultados
+        elif fact_check_result and fact_check_result.get("claims"):
+            verification_method = "FACT_CHECK_API"
+            verification_sources.append("google_factcheck")
+            
+            # Analizar el primer claim encontrado
+            first_claim = fact_check_result["claims"][0]
+            claim_review = first_claim.get("claimReview", [{}])[0]
+            
+            rating = claim_review.get("textualRating", "").lower()
+            
+            # Mapear ratings de Fact Check a nuestro sistema
+            if any(word in rating for word in ["false", "falso", "fake", "incorrecto"]):
+                final_score = 0.1
+                final_label = AnalysisLabel.FAKE
+                final_confidence = 0.85
+                logger.info(f"✅ Fact Check detectó FAKE: {rating}")
+            elif any(word in rating for word in ["true", "verdadero", "correcto", "verified"]):
+                final_score = 0.9
+                final_label = AnalysisLabel.REAL
+                final_confidence = 0.85
+                logger.info(f"✅ Fact Check detectó REAL: {rating}")
+            else:
+                # Rating mixto o incierto
+                final_score = 0.5
+                final_label = AnalysisLabel.UNCERTAIN
+                final_confidence = 0.65
+                logger.info(f"⚠️ Fact Check incierto: {rating}")
+        
+        # Prioridad 3: NewsAPI tiene artículos relevantes
+        elif news_result and news_result.get("found_articles"):
+            verification_method = "NEWS_API"
+            verification_sources.append("newsapi")
+            
+            verdict = news_result.get("verdict", "uncertain")
+            news_confidence = news_result.get("confidence", 0.5)
+            
+            if verdict == "likely_true":
+                final_score = 0.75
+                final_label = AnalysisLabel.REAL
+                final_confidence = news_confidence
+                logger.info(f"📰 NewsAPI: Claim probablemente verdadero ({news_result.get('relevant_articles', 0)} artículos)")
+            elif verdict == "possibly_true":
+                final_score = 0.60
+                final_label = AnalysisLabel.UNCERTAIN
+                final_confidence = news_confidence
+                logger.info(f"📰 NewsAPI: Claim posiblemente verdadero (requiere más verificación)")
+            else:
+                final_score = 0.50
+                final_label = AnalysisLabel.UNCERTAIN
+                final_confidence = news_confidence
+                logger.info(f"📰 NewsAPI: Noticias encontradas pero sin conclusión clara")
+        
+        # Prioridad 4: Fallback a modelos AI
+        else:
+            verification_sources.append("ai_models")
+            logger.info("⚠️ NER, Fact Check y NewsAPI sin resultados, usando modelos AI")
         
         # Obtener información del modelo
         model_info = await ai_analyzer.get_model_info()
@@ -89,9 +233,9 @@ async def analyze_content(
             source_type=source_type.value,
             source_url=source_url,
             file_name=file_name,
-            score=score,
-            label=label.value,
-            confidence=confidence,
+            score=final_score,
+            label=final_label.value,
+            confidence=final_confidence,
             model_version=model_info.get("model_name", "unknown"),
             analysis_time_ms=analysis_time_ms,
             content_length=len(content)
