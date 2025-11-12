@@ -30,32 +30,46 @@ class ContentExtractor:
         Returns:
             Tuple[Optional[str], str, bool]: (contenido, método_usado, éxito)
         """
-        # Intentar primero con newspaper3k (si está disponible)
-        if NEWSPAPER_AVAILABLE:
-            content, success = await self._extract_with_newspaper(url)
-            if success and content:
-                return content, "newspaper", True
-        
-        # Fallback a BeautifulSoup
+        # En ambientes serverless, newspaper3k causa problemas de event loop
+        # Usar solo BeautifulSoup que es async nativo
         content, success = await self._extract_with_beautifulsoup(url)
         if success and content:
             return content, "beautifulsoup", True
         
+        # Fallback a newspaper solo si BeautifulSoup falla Y estamos en ambiente no-serverless
+        if NEWSPAPER_AVAILABLE and not self._is_serverless():
+            try:
+                content, success = await self._extract_with_newspaper(url)
+                if success and content:
+                    return content, "newspaper", True
+            except Exception as e:
+                logger.warning(f"Newspaper fallback falló: {e}")
+        
         return None, "none", False
+    
+    def _is_serverless(self) -> bool:
+        """Detecta si estamos corriendo en ambiente serverless (Vercel, AWS Lambda, etc)"""
+        import os
+        return any([
+            os.environ.get('VERCEL'),
+            os.environ.get('AWS_LAMBDA_FUNCTION_NAME'),
+            os.environ.get('NETLIFY'),
+        ])
     
     async def _extract_with_newspaper(self, url: str) -> Tuple[Optional[str], bool]:
         """Extrae contenido usando newspaper3k"""
         try:
             if not NEWSPAPER_AVAILABLE:
                 return None, False
-                
-            # Ejecutar newspaper en un thread pool ya que no es async
-            loop = asyncio.get_event_loop()
-            article = await loop.run_in_executor(
-                None, 
-                self._newspaper_extract_sync, 
-                url
-            )
+            
+            # Usar asyncio.to_thread para evitar problemas de event loop en serverless
+            try:
+                article = await asyncio.to_thread(self._newspaper_extract_sync, url)
+            except AttributeError:
+                # Fallback para Python < 3.9 o ambientes sin to_thread
+                # En serverless de Vercel, mejor no usar newspaper
+                logger.warning("asyncio.to_thread no disponible, saltando newspaper")
+                return None, False
             
             if article and article.text:
                 # Limpiar y truncar contenido

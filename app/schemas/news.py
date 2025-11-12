@@ -65,6 +65,11 @@ class AnalysisResult(BaseModel):
     source_type: SourceType
     created_at: datetime
     
+    # Nuevo: análisis de características del texto
+    feature_analysis: Optional[dict] = Field(default=None, description="Análisis de características del texto")
+    combined_score: Optional[float] = Field(default=None, ge=0.0, le=1.0, description="Score combinado (IA + características)")
+    warnings: Optional[list] = Field(default=None, description="Advertencias detectadas en el texto")
+    
     class Config:
         from_attributes = True
 

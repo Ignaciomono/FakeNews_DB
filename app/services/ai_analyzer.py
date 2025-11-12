@@ -16,8 +16,7 @@ class FakeNewsLabel(Enum):
 
 class AIAnalyzer:
     def __init__(self):
-        self.session = None
-        self.is_loaded = False
+        self.is_loaded = True  # Siempre disponible
         self.model_name = settings.HF_MODEL_NAME
         self.api_url = f"{settings.HF_API_URL}{self.model_name}"
         
@@ -26,21 +25,13 @@ class AIAnalyzer:
             self.headers["Authorization"] = f"Bearer {settings.HF_API_TOKEN}"
     
     async def initialize(self):
-        try:
-            timeout = aiohttp.ClientTimeout(total=30, connect=10)
-            self.session = aiohttp.ClientSession(timeout=timeout, headers=self.headers)
-            self.is_loaded = True
-        except Exception as e:
-            logger.warning(f"Error: {e}")
-            self.is_loaded = True
+        """Mantenido para compatibilidad, pero ya no necesario"""
+        self.is_loaded = True
     
     async def analyze_text(self, text: str) -> Tuple[float, FakeNewsLabel, float, int]:
-        start_time = time.time() # <-- 2. Registrar el tiempo de inicio
+        start_time = time.time()
 
         try:
-            if not self.session:
-                await self.initialize()
-            
             cleaned_text = text.strip()[:500] if text else "empty"
             api_result = await self._call_api(cleaned_text)
             
@@ -60,12 +51,15 @@ class AIAnalyzer:
     async def _call_api(self, text: str) -> Optional[List[Dict[str, Any]]]:
         try:
             payload = {"inputs": text}
-            async with self.session.post(self.api_url, json=payload) as response:
-                if response.status == 200:
-                    data = await response.json()
-                    # La API de HF puede devolver un dict en lugar de una lista de dicts
-                    return data if isinstance(data, list) else [data]
-                return None
+            timeout = aiohttp.ClientTimeout(total=30, connect=10)
+            # Crear sesión nueva para cada llamada (compatibilidad serverless)
+            async with aiohttp.ClientSession(timeout=timeout, headers=self.headers) as session:
+                async with session.post(self.api_url, json=payload) as response:
+                    if response.status == 200:
+                        data = await response.json()
+                        # La API de HF puede devolver un dict en lugar de una lista de dicts
+                        return data if isinstance(data, list) else [data]
+                    return None
         except Exception:
             return None
     
@@ -79,19 +73,22 @@ class AIAnalyzer:
             label_str = best.get('label', '').upper()
             confidence = best.get('score', 0.5)
             
-            # Mapeo de score (0.0 a 1.0) donde 0 es FAKE y 1 es REAL
-            if "NEGATIVE" in label_str or "FAKE" in label_str:
-                score = 1.0 - confidence
+            # Mapeo mejorado para diferentes modelos
+            # Modelos de fake news: LABEL_0 = FAKE, LABEL_1 = REAL (o viceversa)
+            # Modelos de sentiment: NEGATIVE, NEUTRAL, POSITIVE
+            if "FAKE" in label_str or "LABEL_0" in label_str or "NEGATIVE" in label_str or "FALSE" in label_str:
+                score = 1.0 - confidence  # Score bajo indica fake
                 label = FakeNewsLabel.FAKE
-            elif "POSITIVE" in label_str or "REAL" in label_str:
-                score = confidence
+            elif "REAL" in label_str or "LABEL_1" in label_str or "POSITIVE" in label_str or "TRUE" in label_str:
+                score = confidence  # Score alto indica real
                 label = FakeNewsLabel.REAL
             else: # Neutral, Uncertain, etc.
                 score = 0.5
                 label = FakeNewsLabel.UNCERTAIN
 
             return score, label, confidence
-        except Exception:
+        except Exception as e:
+            logger.error(f"Error procesando resultado del modelo: {e}")
             return (0.5, FakeNewsLabel.UNCERTAIN, 0.5)
     
     def _fallback_analysis(self, text: str) -> Tuple[float, FakeNewsLabel, float]:
@@ -118,7 +115,7 @@ class AIAnalyzer:
         }
     
     async def cleanup(self):
-        if self.session:
-            await self.session.close()
+        # No hay sesión persistente para limpiar
+        pass
 
 ai_analyzer = AIAnalyzer()

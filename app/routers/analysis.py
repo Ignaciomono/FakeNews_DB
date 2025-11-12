@@ -1,7 +1,7 @@
 from fastapi import APIRouter, Depends, HTTPException, UploadFile, File, Form, Request
 from fastapi.responses import JSONResponse
 from sqlalchemy.ext.asyncio import AsyncSession
-from typing import Optional
+from typing import Optional, Union
 import time
 import logging
 
@@ -11,12 +11,13 @@ from app.schemas.news import (
     SourceType, AnalysisLabel
 )
 from app.models.news import NewsAnalysis, AnalysisMetric
-from app.services.ai_analyzer import ai_analyzer
+from app.services.ai_analyzer import ai_analyzer, FakeNewsLabel
 from app.services.entity_verifier import entity_verifier
 from app.services.external_apis import ExternalAPIsService
 from app.services.news_api_service import news_api_service
 from app.utils.content_extractor import content_extractor
 from app.utils.security import security_utils, rate_limiter
+from app.utils.text_analyzer import text_analyzer
 
 logger = logging.getLogger(__name__)
 
@@ -27,9 +28,9 @@ async def analyze_content(
     request: Request,
     db: AsyncSession = Depends(get_db),
     # Parámetros opcionales para diferentes tipos de análisis
-    text: Optional[str] = Form(None),
-    url: Optional[str] = Form(None),
-    file: Optional[UploadFile] = File(None)
+    text: Optional[str] = Form(default=None),
+    url: Optional[str] = Form(default=None),
+    file: Union[UploadFile, str, None] = File(default=None)
 ):
     """
     Analiza contenido de diferentes fuentes para detectar fake news.
@@ -38,7 +39,31 @@ async def analyze_content(
     - text: Texto directo para analizar
     - url: URL de un artículo de noticias
     - file: Archivo de texto (.txt, .docx, .pdf)
+    
+    Acepta tanto Form-data como JSON.
     """
+    
+    # Normalizar valores vacíos a None
+    if text is not None and (text.strip() == "" or text.strip().lower() == "string"):
+        text = None
+    if url is not None and (url.strip() == "" or url.strip().lower() == "string"):
+        url = None
+    if file is not None and (not hasattr(file, 'filename') or not file.filename):
+        file = None
+    
+    # Si no se recibieron parámetros de Form, intentar leer JSON del body
+    if not any([text, url, file]):
+        try:
+            body = await request.json()
+            text = body.get("text")
+            url = body.get("url")
+            # Normalizar de nuevo después de leer JSON
+            if text and text.strip() == "":
+                text = None
+            if url and url.strip() == "":
+                url = None
+        except:
+            pass
     
     # Rate limiting
     client_ip = request.client.host
@@ -87,7 +112,7 @@ async def analyze_content(
         fact_check_result = None
         try:
             external_api_service = ExternalAPIsService()
-            fact_check_result = await external_api_service.check_with_google_factcheck(content[:500])  # Límite de 500 chars
+            fact_check_result = await external_api_service.check_with_google_factcheck(content[:500])
             if fact_check_result and fact_check_result.get("claims"):
                 logger.info(f"Google Fact Check encontró {len(fact_check_result['claims'])} resultados")
         except Exception as e:
@@ -107,62 +132,64 @@ async def analyze_content(
         except Exception as e:
             logger.warning(f"Error en NewsAPI: {e}")
         
-        # PASO 4: Análisis con modelos de IA (sentimiento/patrones) - FALLBACK
-        score, label, confidence, analysis_time_ms = await ai_analyzer.analyze_text(content)
+        # PASO 4: Análisis de IA (fallback)
+        score, ai_label, confidence, analysis_time_ms = await ai_analyzer.analyze_text(content)
         
         # PASO 5: Combinar resultados NER + Fact Check + NewsAPI + AI
         final_score = score
-        final_label = label
+        final_label = ai_label
         final_confidence = confidence
         verification_method = "AI_MODELS"
         verification_sources = []
         
         # Prioridad 1: NER tiene un veredicto claro
         if ner_result and ner_result.get("overall_verdict") is not None:
-            verification_method = "NER_ENTITIES"
-            verification_sources.append("entity_verification")
             
             if ner_result["overall_verdict"] == "fake":
-                final_score = 0.0 + (ner_result["confidence"] * 0.1)  # 0.0 - 0.1 range
-                final_label = AnalysisLabel.FAKE
+                verification_method = "NER_ENTITIES"
+                verification_sources.append("entity_verification")
+                final_score = 0.0 + (ner_result["confidence"] * 0.1)
+                final_label = FakeNewsLabel.FAKE
                 final_confidence = ner_result["confidence"]
                 logger.info(f"✅ NER detectó FAKE: {ner_result.get('explanation', 'Sin explicación')}")
                 
             elif ner_result["overall_verdict"] == "real":
-                final_score = 0.9 + (ner_result["confidence"] * 0.1)  # 0.9 - 1.0 range
-                final_label = AnalysisLabel.REAL
+                verification_method = "NER_ENTITIES"
+                verification_sources.append("entity_verification")
+                final_score = 0.9 + (ner_result["confidence"] * 0.1)
+                final_label = FakeNewsLabel.REAL
                 final_confidence = ner_result["confidence"]
                 logger.info(f"✅ NER detectó REAL: {ner_result.get('explanation', 'Sin explicación')}")
             
             elif ner_result["overall_verdict"] == "needs_verification":
-                # Claim político controversial sin fuente - requiere verificación externa
+                # Claim político controversial sin fuente
                 verification_method = "POLITICAL_CLAIM_UNVERIFIED"
                 verification_sources.append("political_detector")
                 
-                # Intentar verificar con NewsAPI o Fact Check
+                # Intentar verificar con NewsAPI
                 if news_result and news_result.get("found_articles") and news_result.get("relevant_articles", 0) > 0:
-                    # NewsAPI encontró artículos relevantes
+                    verification_method = "POLITICAL_CLAIM_NEWS"
+                    verification_sources.append("newsapi")
                     verdict = news_result.get("verdict", "uncertain")
+                    
                     if verdict == "likely_true":
                         final_score = 0.70
-                        final_label = AnalysisLabel.REAL
+                        final_label = FakeNewsLabel.REAL
                         final_confidence = 0.75
-                        verification_method = "POLITICAL_CLAIM_NEWS"
-                        verification_sources.append("newsapi")
                     elif verdict == "possibly_true":
                         final_score = 0.55
-                        final_label = AnalysisLabel.UNCERTAIN
+                        final_label = FakeNewsLabel.UNCERTAIN
                         final_confidence = 0.60
-                        verification_method = "POLITICAL_CLAIM_NEWS"
-                        verification_sources.append("newsapi")
                     else:
                         final_score = 0.50
-                        final_label = AnalysisLabel.UNCERTAIN
+                        final_label = FakeNewsLabel.UNCERTAIN
                         final_confidence = 0.55
+                    
+                    logger.info(f"📰 Claim político verificado con NewsAPI: {verdict}")
                 else:
-                    # Sin verificación externa - marcar como UNCERTAIN con baja confianza
+                    # Sin verificación externa - UNCERTAIN
                     final_score = 0.50
-                    final_label = AnalysisLabel.UNCERTAIN
+                    final_label = FakeNewsLabel.UNCERTAIN
                     final_confidence = 0.50
                     logger.info(f"⚠️ Claim político sin verificar: {ner_result.get('explanation', 'Sin fuente')}")
         
@@ -171,72 +198,95 @@ async def analyze_content(
             verification_method = "FACT_CHECK_API"
             verification_sources.append("google_factcheck")
             
-            # Analizar el primer claim encontrado
             first_claim = fact_check_result["claims"][0]
             claim_review = first_claim.get("claimReview", [{}])[0]
-            
             rating = claim_review.get("textualRating", "").lower()
             
-            # Mapear ratings de Fact Check a nuestro sistema
             if any(word in rating for word in ["false", "falso", "fake", "incorrecto"]):
                 final_score = 0.1
-                final_label = AnalysisLabel.FAKE
+                final_label = FakeNewsLabel.FAKE
                 final_confidence = 0.85
                 logger.info(f"✅ Fact Check detectó FAKE: {rating}")
             elif any(word in rating for word in ["true", "verdadero", "correcto", "verified"]):
                 final_score = 0.9
-                final_label = AnalysisLabel.REAL
+                final_label = FakeNewsLabel.REAL
                 final_confidence = 0.85
                 logger.info(f"✅ Fact Check detectó REAL: {rating}")
             else:
-                # Rating mixto o incierto
                 final_score = 0.5
-                final_label = AnalysisLabel.UNCERTAIN
+                final_label = FakeNewsLabel.UNCERTAIN
                 final_confidence = 0.65
                 logger.info(f"⚠️ Fact Check incierto: {rating}")
         
         # Prioridad 3: NewsAPI tiene artículos relevantes
-        elif news_result and news_result.get("found_articles"):
+        elif news_result and news_result.get("found_articles") and news_result.get("relevant_articles", 0) > 0:
             verification_method = "NEWS_API"
             verification_sources.append("newsapi")
-            
             verdict = news_result.get("verdict", "uncertain")
-            news_confidence = news_result.get("confidence", 0.5)
             
             if verdict == "likely_true":
                 final_score = 0.75
-                final_label = AnalysisLabel.REAL
-                final_confidence = news_confidence
-                logger.info(f"📰 NewsAPI: Claim probablemente verdadero ({news_result.get('relevant_articles', 0)} artículos)")
+                final_label = FakeNewsLabel.REAL
+                final_confidence = 0.80
+                logger.info(f"📰 NewsAPI: Claim probablemente verdadero")
             elif verdict == "possibly_true":
                 final_score = 0.60
-                final_label = AnalysisLabel.UNCERTAIN
-                final_confidence = news_confidence
+                final_label = FakeNewsLabel.UNCERTAIN
+                final_confidence = 0.65
                 logger.info(f"📰 NewsAPI: Claim posiblemente verdadero (requiere más verificación)")
             else:
                 final_score = 0.50
-                final_label = AnalysisLabel.UNCERTAIN
-                final_confidence = news_confidence
+                final_label = FakeNewsLabel.UNCERTAIN
+                final_confidence = 0.55
                 logger.info(f"📰 NewsAPI: Noticias encontradas pero sin conclusión clara")
         
-        # Prioridad 4: Fallback a modelos AI
-        else:
-            verification_sources.append("ai_models")
-            logger.info("⚠️ NER, Fact Check y NewsAPI sin resultados, usando modelos AI")
+        # 2. Análisis de características del texto
+        features = text_analyzer.analyze(content)
+        combined_score, feature_explanation = text_analyzer.get_recommendation(features, final_score)
+        
+        # 3. Generar warnings basados en características
+        warnings = []
+        if features.sensational_words > 3:
+            warnings.append(f"Detectadas {features.sensational_words} palabras sensacionalistas")
+        if features.clickbait_patterns > 0:
+            warnings.append(f"Detectados {features.clickbait_patterns} patrones de clickbait")
+        if features.caps_ratio > 0.3:
+            warnings.append("Uso excesivo de MAYÚSCULAS")
+        if features.exclamation_ratio > 2:
+            warnings.append("Uso excesivo de signos de exclamación")
+        if features.unverifiable_claims > 1:
+            warnings.append(f"Detectadas {features.unverifiable_claims} afirmaciones no verificables")
+        if features.extraordinary_claims > 0 and not features.has_sources:
+            warnings.append(f"⚠️ CRÍTICO: Afirmaciones extraordinarias sin fuentes verificables detectadas")
+        
+        # Agregar explicación NER si existe
+        if ner_result and ner_result.get("explanation"):
+            warnings.insert(0, f"🔍 Verificación: {ner_result['explanation']}")
+        
+        # 4. Ajustar label final si es necesario
+        if verification_method == "AI_MODELS":
+            # Solo aplicar análisis de features si usamos AI
+            if combined_score < 0.35:
+                final_label = FakeNewsLabel.FAKE
+            elif combined_score > 0.65:
+                final_label = FakeNewsLabel.REAL
+            else:
+                final_label = FakeNewsLabel.UNCERTAIN
+            final_score = combined_score
         
         # Obtener información del modelo
         model_info = await ai_analyzer.get_model_info()
         
-        # Guardar en base de datos
+        # Guardar en base de datos (usando score combinado)
         analysis = NewsAnalysis(
             content=content,
             source_type=source_type.value,
             source_url=source_url,
             file_name=file_name,
-            score=final_score,
-            label=final_label.value,
-            confidence=final_confidence,
-            model_version=model_info.get("model_name", "unknown"),
+            score=final_score,  # Usar score final (NER/NewsAPI/AI)
+            label=final_label.value,  # Usar label final
+            confidence=final_confidence if verification_method != "AI_MODELS" else confidence,
+            model_version=verification_method,  # Guardar método de verificación
             analysis_time_ms=analysis_time_ms,
             content_length=len(content)
         )
@@ -256,28 +306,49 @@ async def analyze_content(
         db.add(metrics)
         await db.commit()
         
-        logger.info(f"Análisis completado - ID: {analysis.id}, Label: {label.value}, Score: {score:.3f}")
+        logger.info(f"Análisis completado - ID: {analysis.id}, Label: {final_label.value}, Combined Score: {combined_score:.3f}, AI Score: {score:.3f}")
         
         return AnalysisResult(
             id=analysis.id,
-            score=score,
-            label=label,
-            confidence=confidence,
-            model_version=model_info.get("model_name", "unknown"),
+            score=final_score,  # Score final
+            label=final_label,  # Label final
+            confidence=final_confidence if verification_method != "AI_MODELS" else confidence,
+            model_version=verification_method,  # Método de verificación usado
             analysis_time_ms=analysis_time_ms,
             content_length=len(content),
             source_type=source_type,
+            combined_score=final_score,
+            feature_analysis={
+                "ai_score": score,
+                "feature_score": features.feature_score if verification_method == "AI_MODELS" else None,
+                "explanation": feature_explanation if verification_method == "AI_MODELS" else ner_result.get("explanation", ""),
+                "verification_method": verification_method,
+                "verification_sources": verification_sources,
+                "sensational_words": features.sensational_words,
+                "clickbait_patterns": features.clickbait_patterns,
+                "caps_ratio": round(features.caps_ratio, 2),
+                "exclamation_ratio": round(features.exclamation_ratio, 2),
+                "has_sources": features.has_sources,
+                "has_dates": features.has_dates
+            },
+            warnings=warnings if warnings else None,
             created_at=analysis.created_at
         )
         
     except HTTPException:
         raise
     except Exception as e:
-        logger.error(f"Error en análisis: {e}")
+        logger.error(f"Error en análisis: {type(e).__name__}: {str(e)}", exc_info=True)
         await db.rollback()
+        
+        # Devolver error más descriptivo
+        error_detail = f"Error interno del servidor: {type(e).__name__}"
+        if str(e):
+            error_detail += f" - {str(e)}"
+        
         raise HTTPException(
             status_code=500,
-            detail="Error interno del servidor durante el análisis"
+            detail=error_detail
         )
 
 @router.get("/{analysis_id}", response_model=DetailedAnalysisResult)

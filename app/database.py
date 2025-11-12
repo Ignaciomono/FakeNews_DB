@@ -1,7 +1,7 @@
 from sqlalchemy import create_engine
 from sqlalchemy.ext.declarative import declarative_base
 from sqlalchemy.orm import sessionmaker
-from sqlalchemy.pool import StaticPool
+from sqlalchemy.pool import StaticPool, NullPool
 import asyncpg
 from sqlalchemy.ext.asyncio import AsyncSession, create_async_engine
 from app.config import settings
@@ -13,16 +13,19 @@ SessionLocal = sessionmaker(autocommit=False, autoflush=False, bind=engine)
 
 # Configuración asíncrona para FastAPI
 ASYNC_DATABASE_URL = settings.DATABASE_URL.replace("postgresql://", "postgresql+asyncpg://")
+
+# En serverless (Vercel), usar NullPool para no mantener conexiones persistentes
 async_engine = create_async_engine(
     ASYNC_DATABASE_URL,
-    pool_size=5,
-    max_overflow=10,
-    pool_pre_ping=True,
-    pool_recycle=300,
-    echo=False
+    poolclass=NullPool,  # Sin pool de conexiones para serverless
+    echo=False,
+    connect_args={
+        "server_settings": {"application_name": "fakenews_api"},
+        "command_timeout": 60,
+    }
 )
 AsyncSessionLocal = sessionmaker(
-    async_engine, class_=AsyncSession, expire_on_commit=False, autoflush=False
+    async_engine, class_=AsyncSession, expire_on_commit=False, autoflush=False, autocommit=False
 )
 
 Base = declarative_base()
